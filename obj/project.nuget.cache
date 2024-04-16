@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "zuk4z0osTGvXMGoHjgp/EjtXLK8i8LB/2SlL9cF9JToz+m6QBuwEd7PSoQYU+Kjc8r8QpF1Ixkt8Hhw7qhYNGA==",
+  "success": true,
+  "projectFilePath": "/home/laser_wolf/git/JobLoopProject/JobLoopProject.csproj",
+  "expectedPackageFiles": [
+    "/home/laser_wolf/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.3/microsoft.aspnetcore.app.ref.8.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
