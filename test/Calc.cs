@@ -1,5 +1,4 @@
 ﻿// TODO:
-// Add and display tracking of execution time
 // Implement logging of results and add display of log
 // Limit input to valid input
 // Add support for negative numbers
