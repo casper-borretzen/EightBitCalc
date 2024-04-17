@@ -1,0 +1,15 @@
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.GeneratedMSBuildEditorConfig.editorconfig
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.AssemblyInfoInputs.cache
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.AssemblyInfo.cs
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.csproj.CoreCompileInputs.cache
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.sourcelink.json
+/home/laser_wolf/git/JobLoopProject/bin/Debug/net8.0/JobLoopProject
+/home/laser_wolf/git/JobLoopProject/bin/Debug/net8.0/JobLoopProject.deps.json
+/home/laser_wolf/git/JobLoopProject/bin/Debug/net8.0/JobLoopProject.runtimeconfig.json
+/home/laser_wolf/git/JobLoopProject/bin/Debug/net8.0/JobLoopProject.dll
+/home/laser_wolf/git/JobLoopProject/bin/Debug/net8.0/JobLoopProject.pdb
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.dll
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/refint/JobLoopProject.dll
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.pdb
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/JobLoopProject.genruntimeconfig.cache
+/home/laser_wolf/git/JobLoopProject/obj/Debug/net8.0/ref/JobLoopProject.dll
