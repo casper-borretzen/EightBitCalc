@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "kjbYHftrWL7rRl/LR6/lNVtoeeR90bpBlSEXVnDGalgSGJf1Eo3z0246l07mISgwchFeqwedHc5cWA8dxF74Og==",
+  "dgSpecHash": "9iTYKgWGesxArjdj0ZvwGg+CzhU0QgStVSipRbuqfdeyrOog83VkIRXSEtrVEKTbZe957txp9a3ye3UfgGkd2g==",
   "success": true,
-  "projectFilePath": "D:\\git\\EightBitCalc\\EightBitCalc.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/home/laser_wolf/git/EightBitCalc/EightBitCalc.csproj",
+  "expectedPackageFiles": [
+    "/home/laser_wolf/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.3/microsoft.aspnetcore.app.ref.8.0.3.nupkg.sha512"
+  ],
   "logs": []
 }
