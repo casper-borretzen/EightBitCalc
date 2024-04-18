@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EightBitCalc")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ce6c5f9f543b432c7fd576d56964cbfcdd40aa45")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b506a485216ff7d6dd348b253ea55d68c57522c8")]
 [assembly: System.Reflection.AssemblyProductAttribute("EightBitCalc")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EightBitCalc")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

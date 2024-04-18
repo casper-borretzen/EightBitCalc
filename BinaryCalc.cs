@@ -282,49 +282,49 @@
         
         // Check if shift was pressed
         bool keyShift = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
-        bool keyCtrl = key.Modifiers.HasFlag(ConsoleModifiers.Control);
+        bool keyAlt = key.Modifiers.HasFlag(ConsoleModifiers.Alt);
 
         // Check if the pressed key is a valid key
         switch (key.Key)
             {
             case ConsoleKey.A:
                 if (keyShift) { AddRegistry(0b00000000); }
-                else if (keyCtrl) { SubtractRegistry(0b00000000); }
+                else if (keyAlt) { SubtractRegistry(0b00000000); }
                 else { ChangeRegister(0b00000000); }
                 break;
             case ConsoleKey.B:
                 if (keyShift) { AddRegistry(0b00000001); }
-                else if (keyCtrl) { SubtractRegistry(0b00000001); }
+                else if (keyAlt) { SubtractRegistry(0b00000001); }
                 else { ChangeRegister(0b00000001); }
                 break;
             case ConsoleKey.C:
                 if (keyShift) { AddRegistry(0b00000010); }
-                else if (keyCtrl) { SubtractRegistry(0b00000010); }
+                else if (keyAlt) { SubtractRegistry(0b00000010); }
                 else { ChangeRegister(0b00000010); }
                 break;
             case ConsoleKey.D:
                 if (keyShift) { AddRegistry(0b00000011); }
-                else if (keyCtrl) { SubtractRegistry(0b00000011); }
+                else if (keyAlt) { SubtractRegistry(0b00000011); }
                 else { ChangeRegister(0b00000011); }
                 break;
             case ConsoleKey.E:
                 if (keyShift) { AddRegistry(0b00000100); }
-                else if (keyCtrl) { SubtractRegistry(0b00000100); }
+                else if (keyAlt) { SubtractRegistry(0b00000100); }
                 else { ChangeRegister(0b00000100); }
                 break;
             case ConsoleKey.F:
                 if (keyShift) { AddRegistry(0b00000101); }
-                else if (keyCtrl) { SubtractRegistry(0b00000101); }
+                else if (keyAlt) { SubtractRegistry(0b00000101); }
                 else { ChangeRegister(0b00000101); }
                 break;
             case ConsoleKey.G:
                 if (keyShift) { AddRegistry(0b00000110); }
-                else if (keyCtrl) { SubtractRegistry(0b00000110); }
+                else if (keyAlt) { SubtractRegistry(0b00000110); }
                 else { ChangeRegister(0b00000110); }
                 break;
             case ConsoleKey.H:
                 if (keyShift) { AddRegistry(0b00000111); }
-                else if (keyCtrl) { SubtractRegistry(0b00000111); }
+                else if (keyAlt) { SubtractRegistry(0b00000111); }
                 else { ChangeRegister(0b00000111); }
                 break;
             case ConsoleKey.D0:
@@ -462,7 +462,7 @@
         Console.WriteLine(" [S+RIGHT]         ROTATE RIGHT               (N,Z,C)");
         Console.WriteLine(" [0] - [7]         EXCLUSIVE OR               (N,Z)");
         Console.WriteLine(" [S+A] - [S+H]     ADD WITH CARRY             (N,V,Z,C)");
-        Console.WriteLine(" [C+A] - [C+H]     SUBTRACT WITH CARRY        (N,V,Z,C)");
+        Console.WriteLine(" [A+A] - [A+H]     SUBTRACT WITH CARRY        (N,V,Z,C)");
         Console.WriteLine(" [A] - [H]         CHANGE ACTIVE REGISTER");
         Console.WriteLine(" [Q]               QUIT PROGRAM");
     }

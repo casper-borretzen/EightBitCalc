@@ -4,5 +4,6 @@
 
  - Change display datatype: string[] display -> bool[,] display
  - Change various ints -> byte
- - Find hotkeys/modifier for AddRegister and SubtractRegister
-
+ - Find hotkeys/modifier for AddRegister and SubtractRegister 
+   (stop using shift+<key> and alt+<key> shortcuts>)
+ - Add "Help" screen
