@@ -1,2 +1,8 @@
+v2
+ - Added highlighting of the bits changed during the last operation
+ - Only refresh render if input is valid
+ - Added state machine with two states for the program: MAIN and HELP
+ - Added sketch of the help screen
+
 v1
   - First version

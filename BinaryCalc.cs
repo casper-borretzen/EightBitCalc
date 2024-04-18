@@ -1,6 +1,11 @@
 ﻿class BinaryCalc
 {
     // Set global constants
+    private enum STATE 
+    {
+        MAIN,
+        HELP
+    };
     private const char EMPTY = ' ';
     private const char FILLED = '#';
     private const int CHAR_SPACING = 2;
@@ -14,16 +19,17 @@
 
     // Set global variables
     private bool running = true;
+    private STATE appState = STATE.MAIN;
     private List<string> messageLog = new List<string>();
     private string[] display = new string[CHAR_HEIGHT];
     private string seperatorLine = "";
+    private byte[] registers = new byte[REGISTER_NUM];
+    private byte[] registersPrev = new byte[REGISTER_NUM];
+    private byte registerIndex = 0;
     private bool carryFlag = false;
     private bool zeroFlag = false;
     private bool negativeFlag = false;
     private bool overflowFlag = false;
-
-    private byte[] registers = new byte[REGISTER_NUM];
-    private byte registerIndex = 0;
 
     // Set console colors
     Dictionary<string, string> colors = new Dictionary<string, string> 
@@ -78,13 +84,12 @@
     // Add message to the message log
     private void MessageAdd(string message)
     {
-        messageLog.Add(DateTime.Now.ToString("HH:mm:ss") + ": " + message.ToUpper());
+        messageLog.Add(DateTime.Now.ToString("HH:mm:ss") + " " + message.ToUpper());
     }
 
     // Initialize values
     private void Init() 
     {
-        // Format the message string
         MessageAdd("Welcome!");
 
         // Make seperator line
@@ -110,6 +115,7 @@
         DIGITS[0,3,4] = true;
         DIGITS[0,4,4] = true;
         DIGITS[0,5,4] = true;
+        //DIGITS[0,3,2] = true;
 
         // One digit
         DIGITS[1,0,2] = true;
@@ -153,103 +159,112 @@
     // Exclusive OR operation
     private void EOR(byte bits, bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         registers[registerIndex] = (byte)(registers[registerIndex] ^ bits);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(EOR) Exclusive OR -> " + ByteToString(bits)); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "EOR: Exclusive OR         <- " + ByteToString(bits)); }
     }
 
     // Arithmetic shift left operation
     private void ASL(bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         if ((registers[registerIndex] & 0b10000000) == 0b10000000) { carryFlag = true; }
         registers[registerIndex] = (byte)(registers[registerIndex] << 1);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ASL) Arithmetic shift left"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ASL: Arithmetic shift left"); }
     }
 
     // Logical shift right operation
     private void LSR(bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
         registers[registerIndex] = (byte)(registers[registerIndex] >> 1);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(LSR) Logical shift right"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "LSR: Logical shift right"); }
     }
 
     // Rotate left operation
     private void ROL(bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         if ((registers[registerIndex] & 0b10000000) == 0b10000000) { carryFlag = true; }
         registers[registerIndex] = (byte)(registers[registerIndex] << 1);
         if (carryFlag) { registers[registerIndex] += 0b00000001; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ROL) Rotate left"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ROL: Rotate left"); }
     }
     
     // Rotate right operation
     private void ROR(bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
         registers[registerIndex] = (byte)(registers[registerIndex] >> 1);
         if (carryFlag) { registers[registerIndex] += 0b10000000; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ROL) Rotate right"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ROL: Rotate right"); }
     }
 
     // Decrement operation
     private void DEC(bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         //if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
         registers[registerIndex] -= (byte)0b00000001;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(DEC) Decrement"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "DEC: Decrement"); }
     }
     
     // Increment operation
     private void INC(bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         //if (registers[registerIndex] == 0b11111111) { carryFlag = true; }
         registers[registerIndex] += (byte)0b00000001;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(INC) Increment"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "INC: Increment"); }
     }
 
     // Add with carry operation
     private void ADC(byte bits, bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         if (((registers[registerIndex] & 0b10000000) == 0b10000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b00000000)) { carryFlag = true; }
         if (((registers[registerIndex] & 0b10000000) == 0b00000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
         registers[registerIndex] += bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ADC) Add with carry -> " + ByteToString(bits) ); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ADC: Add with carry       <- " + ByteToString(bits) ); }
     }
     
     // Subtract with carry operation
     private void SBC(byte bits, bool silent = false)
     {
+        registersPrev[registerIndex] = registers[registerIndex];
         UnsetFlags();
         if (((registers[registerIndex] & 0b00000001) == 0b00000001) && (((registers[registerIndex] + bits) & 0b00000001) == 0b00000000)) { carryFlag = true; }
         if (((registers[registerIndex] & 0b10000000) == 0b00000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
         registers[registerIndex] -= bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(SBC) Subtract with carry -> " + ByteToString(bits) ); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "SBC: Subtract with carry  <- " + ByteToString(bits) ); }
     }
 
     // Add value of the selected registry to the current registry
@@ -259,7 +274,7 @@
         {
             byte bits = registers[targetRegister];
             ADC(bits, true);
-            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ADC) Add with carry -> [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
+            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ADC: Add with carry       <- [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
         }
     }
 
@@ -270,118 +285,148 @@
         {
             byte bits = registers[targetRegister];
             SBC(bits, true);
-            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(SBC) Subtract with carry -> [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
+            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "SBC: Subtract with carry  <- [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
         }
+    }
+
+    // Handle input in main mode
+    private bool GetInputMain(ConsoleKeyInfo key, bool modOne, bool modTwo)
+    {
+        // Check if the pressed key is a valid key
+        switch (key.Key)
+        {
+            case ConsoleKey.A:
+                if (modOne) { AddRegistry(0b00000000); }
+                else if (modTwo) { SubtractRegistry(0b00000000); }
+                else { ChangeRegister(0b00000000); }
+                return true;
+            case ConsoleKey.B:
+                if (modOne) { AddRegistry(0b00000001); }
+                else if (modTwo) { SubtractRegistry(0b00000001); }
+                else { ChangeRegister(0b00000001); }
+                return true;
+            case ConsoleKey.C:
+                if (modOne) { AddRegistry(0b00000010); }
+                else if (modTwo) { SubtractRegistry(0b00000010); }
+                else { ChangeRegister(0b00000010); }
+                return true;
+            case ConsoleKey.D:
+                if (modOne) { AddRegistry(0b00000011); }
+                else if (modTwo) { SubtractRegistry(0b00000011); }
+                else { ChangeRegister(0b00000011); }
+                return true;
+            case ConsoleKey.E:
+                if (modOne) { AddRegistry(0b00000100); }
+                else if (modTwo) { SubtractRegistry(0b00000100); }
+                else { ChangeRegister(0b00000100); }
+                return true;
+            case ConsoleKey.F:
+                if (modOne) { AddRegistry(0b00000101); }
+                else if (modTwo) { SubtractRegistry(0b00000101); }
+                else { ChangeRegister(0b00000101); }
+                return true;
+            case ConsoleKey.G:
+                if (modOne) { AddRegistry(0b00000110); }
+                else if (modTwo) { SubtractRegistry(0b00000110); }
+                else { ChangeRegister(0b00000110); }
+                return true;
+            case ConsoleKey.H:
+                if (modOne) { AddRegistry(0b00000111); }
+                else if (modTwo) { SubtractRegistry(0b00000111); }
+                else { ChangeRegister(0b00000111); }
+                return true;
+            case ConsoleKey.D0:
+                EOR(0b00000001);
+                return true;
+            case ConsoleKey.D1:
+                EOR(0b00000010);
+                return true;
+            case ConsoleKey.D2:
+                EOR(0b00000100);
+                return true;
+            case ConsoleKey.D3:
+                EOR(0b00001000);
+                return true;
+            case ConsoleKey.D4:
+                EOR(0b00010000);
+                return true;
+            case ConsoleKey.D5:
+                EOR(0b00100000);
+                return true;
+            case ConsoleKey.D6:
+                EOR(0b01000000);
+                return true;
+            case ConsoleKey.D7:
+                EOR(0b10000000);
+                return true;
+            case ConsoleKey.LeftArrow:
+                if (modOne) { ROL(); } else { ASL(); }
+                return true;
+            case ConsoleKey.RightArrow:
+                if (modOne) { ROR(); } else { LSR(); }
+                return true;
+            case ConsoleKey.UpArrow:
+                INC();
+                return true;
+            case ConsoleKey.DownArrow:
+                DEC();
+                return true;
+            case ConsoleKey.Escape:
+                running = false;
+                return true;
+        }
+        switch (key.KeyChar)
+        {
+            case '?':
+                appState = STATE.HELP;
+                return true;
+        }
+
+        // No valid input
+        return false;
+    }
+
+    // Handle input in help mode
+    private bool GetInputHelp(ConsoleKeyInfo key, bool modOne, bool modTwo)
+    {
+        // Check if the pressed key is a valid key
+        switch (key.Key)
+        {
+            case ConsoleKey.Escape:
+                appState = STATE.MAIN;
+                return true;
+        }
+
+        // No valid input
+        return false;
     }
 
     // Get input from user
     private void GetInput() 
     {
-        // Wait for and get key input from user
-        ConsoleKeyInfo key = Console.ReadKey(true);
-        
-        // Check if shift was pressed
-        bool keyShift = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
-        bool keyAlt = key.Modifiers.HasFlag(ConsoleModifiers.Alt);
+        // Loop until valid input is given
+        bool validKey = false;
+        while (!validKey)
+        {
+            // Wait for and get key input from user
+            ConsoleKeyInfo key = Console.ReadKey(true);
 
-        // Check if the pressed key is a valid key
-        switch (key.Key)
-            {
-            case ConsoleKey.A:
-                if (keyShift) { AddRegistry(0b00000000); }
-                else if (keyAlt) { SubtractRegistry(0b00000000); }
-                else { ChangeRegister(0b00000000); }
-                break;
-            case ConsoleKey.B:
-                if (keyShift) { AddRegistry(0b00000001); }
-                else if (keyAlt) { SubtractRegistry(0b00000001); }
-                else { ChangeRegister(0b00000001); }
-                break;
-            case ConsoleKey.C:
-                if (keyShift) { AddRegistry(0b00000010); }
-                else if (keyAlt) { SubtractRegistry(0b00000010); }
-                else { ChangeRegister(0b00000010); }
-                break;
-            case ConsoleKey.D:
-                if (keyShift) { AddRegistry(0b00000011); }
-                else if (keyAlt) { SubtractRegistry(0b00000011); }
-                else { ChangeRegister(0b00000011); }
-                break;
-            case ConsoleKey.E:
-                if (keyShift) { AddRegistry(0b00000100); }
-                else if (keyAlt) { SubtractRegistry(0b00000100); }
-                else { ChangeRegister(0b00000100); }
-                break;
-            case ConsoleKey.F:
-                if (keyShift) { AddRegistry(0b00000101); }
-                else if (keyAlt) { SubtractRegistry(0b00000101); }
-                else { ChangeRegister(0b00000101); }
-                break;
-            case ConsoleKey.G:
-                if (keyShift) { AddRegistry(0b00000110); }
-                else if (keyAlt) { SubtractRegistry(0b00000110); }
-                else { ChangeRegister(0b00000110); }
-                break;
-            case ConsoleKey.H:
-                if (keyShift) { AddRegistry(0b00000111); }
-                else if (keyAlt) { SubtractRegistry(0b00000111); }
-                else { ChangeRegister(0b00000111); }
-                break;
-            case ConsoleKey.D0:
-                EOR(0b00000001);
-                break;
-            case ConsoleKey.D1:
-                EOR(0b00000010);
-                break;
-            case ConsoleKey.D2:
-                EOR(0b00000100);
-                break;
-            case ConsoleKey.D3:
-                EOR(0b00001000);
-                break;
-            case ConsoleKey.D4:
-                EOR(0b00010000);
-                break;
-            case ConsoleKey.D5:
-                EOR(0b00100000);
-                break;
-            case ConsoleKey.D6:
-                EOR(0b01000000);
-                break;
-            case ConsoleKey.D7:
-                EOR(0b10000000);
-                break;
-            case ConsoleKey.LeftArrow:
-                if (keyShift) { ROL(); } else { ASL(); }
-                break;
-            case ConsoleKey.RightArrow:
-                if (keyShift) { ROR(); } else { LSR(); }
-                break;
-            case ConsoleKey.UpArrow:
-                INC();
-                break;
-            case ConsoleKey.DownArrow:
-                DEC();
-                break;
-            case ConsoleKey.Q:
-                running = false;
-                break;
-            }
+            // Check if shift was pressed
+            bool keyShift = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
+            bool keyAlt = key.Modifiers.HasFlag(ConsoleModifiers.Alt);
+
+            // Main state
+            if (appState == STATE.MAIN) { validKey = GetInputMain(key, keyShift, keyAlt); }
+            
+            // Help state
+            else if (appState == STATE.HELP) { validKey = GetInputHelp(key, keyShift, keyAlt); }
+        }
     }
 
-    // Render the result on screen
-    private void Render()
+    private void RenderMain()
     {
         // Format the display string
         string displayLine = ByteToString(registers[registerIndex]);
-        
-        // Clear console
-        Console.CursorVisible = false;
-        Console.Clear();
-
-        // Main title
-        Console.WriteLine();
-        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((TOTAL_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(TOTAL_WIDTH, ' ') + colors["default"]);
        
         // Register selector
         Console.WriteLine();
@@ -416,8 +461,12 @@
                     currentDigit = (int)Char.GetNumericValue(currentChar); 
                 }
 
+                // Check if the current bit was changed by last operation
+                byte bitToCheck = (byte)(0b10000000 >> (byte)(x / CHAR_WIDTH));
+                bool bitChanged = (registers[registerIndex] & bitToCheck) != (registersPrev[registerIndex] & bitToCheck);
+                
                 // Set the value of the current "pixel"
-                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? FILLED : EMPTY;
+                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? bitChanged ? colors["fgBrightYellow"] + FILLED + colors["default"] : FILLED : EMPTY;
             }
 
             // Render the results of the current row
@@ -464,7 +513,72 @@
         Console.WriteLine(" [S+A] - [S+H]     ADD WITH CARRY             (N,V,Z,C)");
         Console.WriteLine(" [A+A] - [A+H]     SUBTRACT WITH CARRY        (N,V,Z,C)");
         Console.WriteLine(" [A] - [H]         CHANGE ACTIVE REGISTER");
-        Console.WriteLine(" [Q]               QUIT PROGRAM");
+        Console.WriteLine(" [?]               HELP");
+        Console.WriteLine(" [ESC]             QUIT PROGRAM");
+    }
+
+    private void RenderHelp(){
+        //Console.WriteLine();
+        //Console.WriteLine(" HELP SCREEN");
+        //Console.WriteLine(seperatorLine);
+        Console.WriteLine();
+        Console.WriteLine(" HELP SCREEN NOT FINISHED!! (WORK-IN-PROGRESS)");
+        Console.WriteLine();
+        Console.WriteLine(" BINARY NUMBERS ... SOMETHING SOMETHING ...");
+        Console.WriteLine(" ... BITS AND BYTES ...");
+        Console.WriteLine();
+        Console.WriteLine(" BASE-2 (BINARY) TO BASE-10 (DECIMAL):");
+        Console.WriteLine("  128's  64's  32's  16's   8's   4's   2's   1's");
+        Console.WriteLine("    |     |     |     |     |     |     |     |");
+        Console.WriteLine("    0     0     0     0     0     1     1     1  =  7");
+        Console.WriteLine("    0     1     1     1     1     1     1     1  =  127");
+        Console.WriteLine("    1     0     0     0     0     0     0     1  =  128");
+        Console.WriteLine("    1     1     1     1     1     1     1     1  =  255");
+        Console.WriteLine();
+        Console.WriteLine(" NEGATIVE NUMBERS USING TWO\'S COMPLIMENT:");
+        Console.WriteLine(" -128's  64's  32's  16's   8's   4's   2's   1's");
+        Console.WriteLine("    |     |     |     |     |     |     |     |");
+        Console.WriteLine("    0     0     0     0     0     1     1     1  =  7");
+        Console.WriteLine("    0     1     1     1     1     1     1     1  =  127");
+        Console.WriteLine("    1     0     0     0     0     0     0     1  =  -128");
+        Console.WriteLine("    1     1     1     1     1     1     1     1  =  -1");
+        Console.WriteLine();
+        Console.WriteLine(seperatorLine);
+        Console.WriteLine(" OPCODES:");
+        Console.WriteLine(" ADC");
+        Console.WriteLine(" ...");
+        Console.WriteLine(seperatorLine);
+        Console.WriteLine(" FLAGS:");
+        Console.WriteLine(" (C)");
+        Console.WriteLine(" ...");
+        Console.WriteLine(seperatorLine);
+        Console.WriteLine(" REGISTERS:");
+        Console.WriteLine(" [A]");
+        Console.WriteLine(" ...");
+        Console.WriteLine(seperatorLine);
+        Console.WriteLine(" KEYBINDINGS AND MODIFIERS:");
+        Console.WriteLine(" <KEY>");
+        Console.WriteLine(" ...");
+        Console.WriteLine(seperatorLine);
+        Console.WriteLine(" PRESS [ESC] TO EXIT");
+    }
+
+    // Render the result on screen
+    private void Render()
+    {
+        // Clear console
+        Console.CursorVisible = false;
+        Console.Clear();
+
+        // Main title
+        Console.WriteLine();
+        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((TOTAL_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(TOTAL_WIDTH, ' ') + colors["default"]);
+      
+        // Main state
+        if (appState == STATE.MAIN) { RenderMain(); }
+
+        // Help state
+        else if (appState == STATE.HELP) { RenderHelp(); }
     }
     
     // Main loop

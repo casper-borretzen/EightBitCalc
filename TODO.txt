@@ -1,0 +1,96 @@
+///////////////////////////////////////////////////////////////////////////////
+// TODO:
+///////////////////////////////////////////////////////////////////////////////
+
+ - State machine:
+    + Main states:
+      X Main
+      X Help
+      + Settings
+    + Sub states:
+      + Main -> (1st) Normal
+      + Main -> (2nd) Command
+
+ - Add "Help" screen
+    + Explain opcodes and operations
+    + Explain (C) Flags
+    + Explain [A] Registers
+    + Explain <KEY> Keybinds and modifiers
+    + Explain binary number system (base-2) and show decimal value of each bit
+ 
+ - Better keybindings!
+    MOD:  KEY:       ACTION:
+     -    <UP>       INC
+     -    <DOWN>     DEC
+     $0   <LEFT>     ASL
+     $0   <RIGHT>    LSR
+     $1   <LEFT>     ROL
+     $1   <RIGHT>    ROR
+     $2   <LEFT>     CHANGE ACTIVE REGISTER <-
+     $2   <RIGHT>    CHANGE ACTIVE REGISTER ->
+     -    <0> - <7>  EOR
+     $0   <A> - <H>  CHANGE ACTIVE REGISTER
+     $1   <A> - <H>  ADC
+     $2   <A> - <H>  SBC
+     $3   <A> - <H>  TRANSFER FROM REGISTER TO ACTIVE REGISTER
+     -    <M>        CHANGE MODIFIER ($0,$1,$2,$3)
+     -    <Q>        QUIT
+    ------------------------------------------
+    SHIFT = $1 MODE ($0 IF IN $1 MODE)
+    ALT = $2 MODE ($0 IF IN $2 MODE)
+    SHIFT + ALT = $3 MODE ($0 IF IN $3 MODE)
+
+ - Better logging system (logger class? or struct?)
+    + split logging to:
+      + timestamp
+      + assembly code
+      + user friendly text
+    + (optional) Save message log to file as assembly code "calc.asm"
+
+ - Flags:
+    + Put all flags in a dictionary? Or make flags class or struct?
+    + Are flags modelled correctly? Probably not, needs to be checked
+    + Add support for manual/auto flag mode (flags auto clear)
+    + Add new operation: CLC
+    + Add new operation: SEC
+    + Add new operation: CLV
+
+ - Settings menu:
+    + Put all settings in a dictionary?
+    + Save assembly code to file? (Y/N)
+    + Auto set carry flag? (Y/N)
+    + Highlight changed bits? (Y/N)
+ 
+ - Logical instructions:
+    + Add new opertion: AND
+    + Add new operation: ORA
+
+ - Add transfer operations (Txx)
+
+ - Add support for commands by pressing ":" followed by opcode (e.g. :STA 01000000)
+    + INC
+    + DEC
+    + ASL
+    + LSR
+    + ROL
+    + ROR
+    + EOR <bits>
+    + AND <bits>
+    + ORA <bits>
+    + ADC <bits>
+    + SBC <bits>
+    + CLC
+    + SEC
+    + CLV
+    + T<FIRST REGISTER><SECOND REGISTER> (e.g. TAB -> TRANSFER A TO B)
+
+ - UI overhaul
+
+ ? Change display datatype: string[] display -> bool[,] display
+
+ ? Change various ints -> byte
+
+ ? Add fake RAM (loading and storing of values in stack)
+
+ ? Add changed flags to message log
+
