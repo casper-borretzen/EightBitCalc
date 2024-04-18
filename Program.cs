@@ -4,6 +4,6 @@ class Program
 {
     static void Main(string[] args)
     {
-        BinaryCalc binaryCalc = new BinaryCalc();
+        EightBitCalc eightBitCalc = new EightBitCalc();
     }
 }

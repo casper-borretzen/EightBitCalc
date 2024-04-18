@@ -4,7 +4,7 @@
 // Change various ints -> byte
 // Find hotkeys/modifier for SubtractRegister (atm it is ctrl, but doesn't work so well)
 
-class BinaryCalc
+class EightBitCalc
 {
     // Set global constants
     private const char EMPTY = ' ';
@@ -490,7 +490,7 @@ class BinaryCalc
     }
    
     // Class constructor
-    public BinaryCalc()
+    public EightBitCalc()
     {
         Init();
         Run();

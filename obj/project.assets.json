@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/laser_wolf/git/JobLoopProject/JobLoopProject.csproj",
+      "projectUniqueName": "/home/laser_wolf/git/EightBitCalc/JobLoopProject.csproj",
       "projectName": "JobLoopProject",
-      "projectPath": "/home/laser_wolf/git/JobLoopProject/JobLoopProject.csproj",
+      "projectPath": "/home/laser_wolf/git/EightBitCalc/JobLoopProject.csproj",
       "packagesPath": "/home/laser_wolf/.nuget/packages/",
-      "outputPath": "/home/laser_wolf/git/JobLoopProject/obj/",
+      "outputPath": "/home/laser_wolf/git/EightBitCalc/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/laser_wolf/.nuget/NuGet/NuGet.Config"

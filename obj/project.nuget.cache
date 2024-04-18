@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zuk4z0osTGvXMGoHjgp/EjtXLK8i8LB/2SlL9cF9JToz+m6QBuwEd7PSoQYU+Kjc8r8QpF1Ixkt8Hhw7qhYNGA==",
+  "dgSpecHash": "aWQfiTnpDzYUindM5kS4Wn28ka84AQmkEXe9qzWfbF9IyErSFAhQCYpu2HIf4Q+xxAnylCG0DP7JltGzphDjug==",
   "success": true,
-  "projectFilePath": "/home/laser_wolf/git/JobLoopProject/JobLoopProject.csproj",
+  "projectFilePath": "/home/laser_wolf/git/EightBitCalc/JobLoopProject.csproj",
   "expectedPackageFiles": [
     "/home/laser_wolf/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.3/microsoft.aspnetcore.app.ref.8.0.3.nupkg.sha512"
   ],
