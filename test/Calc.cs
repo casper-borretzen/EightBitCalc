@@ -55,7 +55,6 @@ class Calc
     // Set global variables
     private bool running = true;
     private bool error = false;
-    private string errorMessage = "";
     private List<string> messageLog = new List<string>();
     private string inputExpressions = "";
     private string[] display = new string[CHAR_HEIGHT];

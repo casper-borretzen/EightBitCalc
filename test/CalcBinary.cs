@@ -1,5 +1,7 @@
 ﻿// TODO:
 // string[] display -> bool[,] display
+// int -> byte
+// find hotkeys (modifier) for sbc
 
 class CalcBinary
 {
@@ -11,17 +13,22 @@ class CalcBinary
     private const int CHAR_WIDTH = 5 + CHAR_SPACING;
     private const int CHAR_LIMIT = 8;
     private bool[,,] DIGITS = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
+    private const string MAIN_TITLE = "8-BIT BINARY CALCULATOR";
+    private const int TOTAL_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
+    private const int REGISTER_NUM = 8;
 
     // Set global variables
     private bool running = true;
-    private bool error = false;
     private List<string> messageLog = new List<string>();
     private string[] display = new string[CHAR_HEIGHT];
     private string seperatorLine = "";
-    private byte binaryValue = 0;
     private bool carryFlag = false;
     private bool zeroFlag = false;
     private bool negativeFlag = false;
+    private bool overflowFlag = false;
+
+    private byte[] registers = new byte[REGISTER_NUM];
+    private byte registerIndex = 0;
 
     // Set console colors
     Dictionary<string, string> colors = new Dictionary<string, string> 
@@ -65,6 +72,18 @@ class CalcBinary
     private string ByteToString(byte bits)
     {
         return Convert.ToString(bits, 2).PadLeft(8, '0');
+    }
+    
+    // Get the letter for a given register
+    private char GetRegisterChar(byte index)
+    {
+        return (char)((int)'A' + index);
+    }
+    
+    // Add message to the message log
+    private void MessageAdd(string message)
+    {
+        messageLog.Add(DateTime.Now.ToString("HH:mm:ss") + ": " + message.ToUpper());
     }
 
     // Initialize values
@@ -110,107 +129,150 @@ class CalcBinary
         DIGITS[1,6,3] = true;
     }
 
-    // Add message to the message log
-    private void MessageAdd(string message)
-    {
-        messageLog.Add(DateTime.Now.ToString("HH:mm:ss") + ": " + message.ToUpper());
-    }
-
     // Unset all flags
     private void UnsetFlags()
     {
         carryFlag = false;
         zeroFlag = false;
         negativeFlag = false;
+        overflowFlag = false;
     }
 
     // Check zero flag if value is zero
     private void SetZeroFlag() 
     {
-        if (binaryValue == 0b00000000) { zeroFlag = true; }
+        if (registers[registerIndex] == 0b00000000) { zeroFlag = true; }
     }
 
     // Set negative flag if bit 7 is set
     private void SetNegativeFlag()
     {
-        if ((binaryValue & 0b10000000) == 0b10000000) { negativeFlag = true; }
+        if ((registers[registerIndex] & 0b10000000) == 0b10000000) { negativeFlag = true; }
+    }
+
+    private void ChangeRegister(byte targetRegistry)
+    {
+        registerIndex = targetRegistry;
     }
 
     // Rxclusive OR operation
     private void EOR(byte bits, bool silent = false)
     {
         UnsetFlags();
-        binaryValue = (byte)(binaryValue ^ bits);
+        registers[registerIndex] = (byte)(registers[registerIndex] ^ bits);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("(EOR) Exclusive OR -> " + ByteToString(bits)); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(EOR) Exclusive OR -> " + ByteToString(bits)); }
     }
 
     // Arithmetic shift left operation
     private void ASL(bool silent = false)
     {
         UnsetFlags();
-        if ((binaryValue & 0b10000000) == 0b10000000) { carryFlag = true; }
-        binaryValue = (byte)(binaryValue << 1);
+        if ((registers[registerIndex] & 0b10000000) == 0b10000000) { carryFlag = true; }
+        registers[registerIndex] = (byte)(registers[registerIndex] << 1);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("(ASL) Arithmetic shift left"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ASL) Arithmetic shift left"); }
     }
 
     // Logical shift right operation
     private void LSR(bool silent = false)
     {
         UnsetFlags();
-        if ((binaryValue & 0b00000001) == 0b00000001) {carryFlag = true;}
-        binaryValue = (byte)(binaryValue >> 1);
+        if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
+        registers[registerIndex] = (byte)(registers[registerIndex] >> 1);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("(LSR) Logical shift right"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(LSR) Logical shift right"); }
     }
 
     // Rotate left operation
     private void ROL(bool silent = false)
     {
         UnsetFlags();
-        if ((binaryValue & 0b10000000) == 0b10000000) { carryFlag = true; }
-        binaryValue = (byte)(binaryValue << 1);
-        if (carryFlag) { binaryValue += 0b00000001; }
+        if ((registers[registerIndex] & 0b10000000) == 0b10000000) { carryFlag = true; }
+        registers[registerIndex] = (byte)(registers[registerIndex] << 1);
+        if (carryFlag) { registers[registerIndex] += 0b00000001; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("(ROL) Rotate left"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ROL) Rotate left"); }
     }
     
     // Rotate right operation
     private void ROR(bool silent = false)
     {
         UnsetFlags();
-        if ((binaryValue & 0b00000001) == 0b00000001) {carryFlag = true;}
-        binaryValue = (byte)(binaryValue >> 1);
-        if (carryFlag) { binaryValue += 0b10000000; }
+        if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
+        registers[registerIndex] = (byte)(registers[registerIndex] >> 1);
+        if (carryFlag) { registers[registerIndex] += 0b10000000; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("(ROL) Rotate right"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ROL) Rotate right"); }
     }
 
     // Decrement operation
     private void DEC(bool silent = false)
     {
         UnsetFlags();
-        if ((binaryValue & 0b00000001) == 0b00000001) {carryFlag = true;}
-        binaryValue -= (byte)0b00000001;
+        //if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
+        registers[registerIndex] -= (byte)0b00000001;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("(DEC) Decrement"); }
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(DEC) Decrement"); }
     }
     
     // Increment operation
     private void INC(bool silent = false)
     {
         UnsetFlags();
-        if (binaryValue == 255) { carryFlag = true; }
-        binaryValue += (byte)0b00000001;
+        //if (registers[registerIndex] == 0b11111111) { carryFlag = true; }
+        registers[registerIndex] += (byte)0b00000001;
         SetZeroFlag();
-        if (!silent) { MessageAdd("(INC) Increment"); }
+        SetNegativeFlag();
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(INC) Increment"); }
+    }
+
+    // Add with carry operation
+    private void ADC(byte bits, bool silent = false)
+    {
+        UnsetFlags();
+        if (((registers[registerIndex] & 0b10000000) == 0b10000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b00000000)) { carryFlag = true; }
+        if (((registers[registerIndex] & 0b10000000) == 0b00000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
+        registers[registerIndex] += bits;
+        SetZeroFlag();
+        SetNegativeFlag();
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ADC) Add with carry -> " + ByteToString(bits) ); }
+    }
+    
+    // Subtract with carry operation
+    private void SBC(byte bits, bool silent = false)
+    {
+        UnsetFlags();
+        if (((registers[registerIndex] & 0b00000001) == 0b00000001) && (((registers[registerIndex] + bits) & 0b00000001) == 0b00000000)) { carryFlag = true; }
+        if (((registers[registerIndex] & 0b10000000) == 0b00000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
+        registers[registerIndex] -= bits;
+        SetZeroFlag();
+        SetNegativeFlag();
+        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(SBC) Subtract with carry -> " + ByteToString(bits) ); }
+    }
+
+    // Add value of the selected registry to the current registry
+    private void AddRegistry(byte targetRegistry)
+    {
+        if (registerIndex != targetRegistry)
+        {
+            ADC(registers[targetRegistry]);
+        }
+    }
+
+    // Subtract value of the current registry with the selected registry
+    private void SubtractRegistry(byte targetRegistry)
+    {
+        if (registerIndex != targetRegistry)
+        {
+            SBC(registers[targetRegistry]);
+        }
     }
 
     // Get input from user
@@ -221,10 +283,51 @@ class CalcBinary
         
         // Check if shift was pressed
         bool keyShift = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
+        bool keyCtrl = key.Modifiers.HasFlag(ConsoleModifiers.Control);
 
         // Check if the pressed key is a valid key
         switch (key.Key)
             {
+            case ConsoleKey.A:
+                if (keyShift) { AddRegistry(0b00000000); }
+                else if (keyCtrl) { SubtractRegistry(0b00000000); }
+                else { ChangeRegister(0b00000000); }
+                break;
+            case ConsoleKey.B:
+                if (keyShift) { AddRegistry(0b00000001); }
+                else if (keyCtrl) { SubtractRegistry(0b00000001); }
+                else { ChangeRegister(0b00000001); }
+                break;
+            case ConsoleKey.C:
+                if (keyShift) { AddRegistry(0b00000010); }
+                else if (keyCtrl) { SubtractRegistry(0b00000010); }
+                else { ChangeRegister(0b00000010); }
+                break;
+            case ConsoleKey.D:
+                if (keyShift) { AddRegistry(0b00000011); }
+                else if (keyCtrl) { SubtractRegistry(0b00000011); }
+                else { ChangeRegister(0b00000011); }
+                break;
+            case ConsoleKey.E:
+                if (keyShift) { AddRegistry(0b00000100); }
+                else if (keyCtrl) { SubtractRegistry(0b00000100); }
+                else { ChangeRegister(0b00000100); }
+                break;
+            case ConsoleKey.F:
+                if (keyShift) { AddRegistry(0b00000101); }
+                else if (keyCtrl) { SubtractRegistry(0b00000101); }
+                else { ChangeRegister(0b00000101); }
+                break;
+            case ConsoleKey.G:
+                if (keyShift) { AddRegistry(0b00000110); }
+                else if (keyCtrl) { SubtractRegistry(0b00000110); }
+                else { ChangeRegister(0b00000110); }
+                break;
+            case ConsoleKey.H:
+                if (keyShift) { AddRegistry(0b00000111); }
+                else if (keyCtrl) { SubtractRegistry(0b00000111); }
+                else { ChangeRegister(0b00000111); }
+                break;
             case ConsoleKey.D0:
                 EOR(0b00000001);
                 break;
@@ -261,7 +364,7 @@ class CalcBinary
             case ConsoleKey.DownArrow:
                 DEC();
                 break;
-            case ConsoleKey.Escape:
+            case ConsoleKey.Q:
                 running = false;
                 break;
             }
@@ -271,25 +374,45 @@ class CalcBinary
     private void Render()
     {
         // Format the display string
-        string displayLine = ByteToString(binaryValue);
+        string displayLine = ByteToString(registers[registerIndex]);
         
         // Clear console
         Console.CursorVisible = false;
         Console.Clear();
 
-        // Text above the display
+        // Main title
         Console.WriteLine();
-        string mainTitle = "SIMPLE 8-BIT BINARY CALCULATOR";
-        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (mainTitle.PadLeft((int)((CHAR_LIMIT * CHAR_WIDTH) - (mainTitle.Length / 2)), ' ')).PadRight(CHAR_LIMIT * CHAR_WIDTH, ' ') + colors["default"]);
+        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((TOTAL_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(TOTAL_WIDTH, ' ') + colors["default"]);
+        
+        // Message log
+        Console.WriteLine(messageLog.Count > 7 ? " " + messageLog[messageLog.Count-8] : " -");
+        Console.WriteLine(messageLog.Count > 6 ? " " + messageLog[messageLog.Count-7] : " -");
+        Console.WriteLine(messageLog.Count > 5 ? " " + messageLog[messageLog.Count-6] : " -");
         Console.WriteLine(messageLog.Count > 4 ? " " + messageLog[messageLog.Count-5] : " -");
         Console.WriteLine(messageLog.Count > 3 ? " " + messageLog[messageLog.Count-4] : " -");
         Console.WriteLine(messageLog.Count > 2 ? " " + messageLog[messageLog.Count-3] : " -");
         Console.WriteLine(messageLog.Count > 1 ? " " + messageLog[messageLog.Count-2] : " -");
         Console.WriteLine(messageLog.Count > 0 ? " " + messageLog.Last() : " -");
         Console.WriteLine(seperatorLine);
+       
+        // Register selector
+        Console.WriteLine(" REGISTERS:");
+        string registerLine = " ";
+        string registerLineHex = " ";
+        for (byte i = 0; i < REGISTER_NUM; i++)
+        {
+            if (i == registerIndex) { registerLine += colors["fgBlack"] + colors["bgBrightYellow"]; }
+            registerLine += "  " + GetRegisterChar(i) + "  ";
+            if (i == registerIndex) { registerLine += colors["default"]; }
+            registerLine += "  ";
+            registerLineHex += " 0x" + registers[i].ToString("X2") + " ";
+            registerLineHex += " ";
+        }
+        Console.WriteLine(registerLine);
+        Console.WriteLine(registerLineHex);
+        Console.WriteLine(seperatorLine);
 
-        // Iterate through the x and y coords of the "pixels" 
-        // and display the character from the binary value string
+        // Iterate through the x and y coords of the "pixels" and display the digits from the selected register
         for (int y = 0; y < CHAR_HEIGHT; y++)
         {
             display[y] = " ";
@@ -315,22 +438,26 @@ class CalcBinary
 
         // Text under the display
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" UNSIGNED VALUE:   " + binaryValue.ToString());
-        Console.WriteLine(" SIGNED VALUE:     " + ((int)((binaryValue & 0b01111111) - (binaryValue & 0b10000000))).ToString());
-        Console.WriteLine(" ASCII CHARACTER:  " + (binaryValue > 32 ? (char)binaryValue : "-"));
+        Console.WriteLine(" UNSIGNED VALUE:       " + registers[registerIndex].ToString());
+        Console.WriteLine(" SIGNED VALUE:         " + ((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString());
+        //Console.WriteLine(" ASCII CHARACTER:  " + (registers[registerIndex] > 32 ? (char)registers[registerIndex] : "-"));
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" CARRY FLAG:       " + colors["fgBlack"] + (carryFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
-        Console.WriteLine(" ZERO FLAG:        " + colors["fgBlack"] + (zeroFlag ? colors["bgBrightGreen"] + "1"  : colors["bgBrightRed"] + "0") + colors["default"]);
-        Console.WriteLine(" NEGATIVE FLAG:    " + colors["fgBlack"] + (negativeFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
+        Console.WriteLine(" (C) CARRY FLAG:       " + colors["fgBlack"] + (carryFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
+        Console.WriteLine(" (Z) ZERO FLAG:        " + colors["fgBlack"] + (zeroFlag ? colors["bgBrightGreen"] + "1"  : colors["bgBrightRed"] + "0") + colors["default"]);
+        Console.WriteLine(" (N) NEGATIVE FLAG:    " + colors["fgBlack"] + (negativeFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
+        Console.WriteLine(" (V) OVERFLOW FLAG:    " + colors["fgBlack"] + (overflowFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" [UP]      (INC) INCREMENT");
-        Console.WriteLine(" [DOWN]    (DEC) DECREMENT");
-        Console.WriteLine(" [LEFT]    (ASL) ARITHMETIC SHIFT LEFT");
-        Console.WriteLine(" [RIGHT]   (LSR) LOGICAL SHIFT RIGHT");
-        Console.WriteLine(" [S-LEFT]  (ROL) ROTATE LEFT");
-        Console.WriteLine(" [S-RIGHT] (ROR) ROTATE RIGHT");
-        Console.WriteLine(" [0] - [7] (EOR) EXCLUSIVE OR");
-        Console.WriteLine(" [ESC]     QUIT PROGRAM");
+        Console.WriteLine(" [UP]          INCREMENT             (N,Z)");
+        Console.WriteLine(" [DOWN]        DECREMENT             (N,Z)");
+        Console.WriteLine(" [LEFT]        ARITHMETIC SHIFT LEFT (N,Z,C)");
+        Console.WriteLine(" [RIGHT]       LOGICAL SHIFT RIGHT   (N,Z,C)");
+        Console.WriteLine(" [S+LEFT]      ROTATE LEFT           (N,Z,C)");
+        Console.WriteLine(" [S+RIGHT]     ROTATE RIGHT          (N,Z,C)");
+        Console.WriteLine(" [0] - [7]     EXCLUSIVE OR          (N,Z)");
+        Console.WriteLine(" [S+A] - [S+H] ADD WITH CARRY        (N,V,Z,C)");
+        Console.WriteLine(" [C+A] - [C+H] SUBTRACT WITH CARRY   (N,V,Z,C)");
+        Console.WriteLine(" [A] - [H]     CHANGE ACTIVE REGISTER");
+        Console.WriteLine(" [Q]           QUIT PROGRAM");
     }
     
     // Main loop
@@ -344,6 +471,8 @@ class CalcBinary
         }
 
         // Exit the program and clear the console
+        Console.WriteLine(colors["default"]);
+        Console.CursorVisible = true;
         Console.Clear();
     }
    
