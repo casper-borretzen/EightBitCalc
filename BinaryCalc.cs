@@ -1,4 +1,5 @@
 ﻿// TODO:
+// Rename C# project -> BinaryCalc or EightBitCalc or 8BitCalc
 // Change display datatype: string[] display -> bool[,] display
 // Change various ints -> byte
 // Find hotkeys/modifier for SubtractRegister (atm it is ctrl, but doesn't work so well)
