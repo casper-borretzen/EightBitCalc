@@ -1,7 +1,7 @@
 ﻿// TODO:
-// string[] display -> bool[,] display
-// int -> byte
-// find hotkeys (modifier) for sbc
+// Change display datatype: string[] display -> bool[,] display
+// Change various ints -> byte
+// Find hotkeys/modifier for SubtractRegister (atm it is ctrl, but doesn't work so well)
 
 class CalcBinary
 {
@@ -150,12 +150,12 @@ class CalcBinary
         if ((registers[registerIndex] & 0b10000000) == 0b10000000) { negativeFlag = true; }
     }
 
-    private void ChangeRegister(byte targetRegistry)
+    private void ChangeRegister(byte targetRegister)
     {
-        registerIndex = targetRegistry;
+        registerIndex = targetRegister;
     }
 
-    // Rxclusive OR operation
+    // Exclusive OR operation
     private void EOR(byte bits, bool silent = false)
     {
         UnsetFlags();
@@ -258,20 +258,24 @@ class CalcBinary
     }
 
     // Add value of the selected registry to the current registry
-    private void AddRegistry(byte targetRegistry)
+    private void AddRegistry(byte targetRegister, bool silent = false)
     {
-        if (registerIndex != targetRegistry)
+        if (registerIndex != targetRegister)
         {
-            ADC(registers[targetRegistry]);
+            byte bits = registers[targetRegister];
+            ADC(bits, true);
+            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(ADC) Add with carry -> [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
         }
     }
 
     // Subtract value of the current registry with the selected registry
-    private void SubtractRegistry(byte targetRegistry)
+    private void SubtractRegistry(byte targetRegister, bool silent = false)
     {
-        if (registerIndex != targetRegistry)
+        if (registerIndex != targetRegister)
         {
-            SBC(registers[targetRegistry]);
+            byte bits = registers[targetRegister];
+            SBC(bits, true);
+            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "(SBC) Subtract with carry -> [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
         }
     }
 
@@ -383,20 +387,9 @@ class CalcBinary
         // Main title
         Console.WriteLine();
         Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((TOTAL_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(TOTAL_WIDTH, ' ') + colors["default"]);
-        
-        // Message log
-        Console.WriteLine(messageLog.Count > 7 ? " " + messageLog[messageLog.Count-8] : " -");
-        Console.WriteLine(messageLog.Count > 6 ? " " + messageLog[messageLog.Count-7] : " -");
-        Console.WriteLine(messageLog.Count > 5 ? " " + messageLog[messageLog.Count-6] : " -");
-        Console.WriteLine(messageLog.Count > 4 ? " " + messageLog[messageLog.Count-5] : " -");
-        Console.WriteLine(messageLog.Count > 3 ? " " + messageLog[messageLog.Count-4] : " -");
-        Console.WriteLine(messageLog.Count > 2 ? " " + messageLog[messageLog.Count-3] : " -");
-        Console.WriteLine(messageLog.Count > 1 ? " " + messageLog[messageLog.Count-2] : " -");
-        Console.WriteLine(messageLog.Count > 0 ? " " + messageLog.Last() : " -");
-        Console.WriteLine(seperatorLine);
        
         // Register selector
-        Console.WriteLine(" REGISTERS:");
+        Console.WriteLine();
         string registerLine = " ";
         string registerLineHex = " ";
         for (byte i = 0; i < REGISTER_NUM; i++)
@@ -436,28 +429,47 @@ class CalcBinary
             Console.WriteLine(display[y]);
         }
 
-        // Text under the display
+        // Decimal values
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" UNSIGNED VALUE:       " + registers[registerIndex].ToString());
-        Console.WriteLine(" SIGNED VALUE:         " + ((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString());
+        Console.WriteLine(" UNSIGNED VALUE:     " + (registers[registerIndex].ToString()).PadLeft(3,' ') + "        SIGNED VALUE:      " + (((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString()).PadLeft(4,' '));
         //Console.WriteLine(" ASCII CHARACTER:  " + (registers[registerIndex] > 32 ? (char)registers[registerIndex] : "-"));
+
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" (C) CARRY FLAG:       " + colors["fgBlack"] + (carryFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
-        Console.WriteLine(" (Z) ZERO FLAG:        " + colors["fgBlack"] + (zeroFlag ? colors["bgBrightGreen"] + "1"  : colors["bgBrightRed"] + "0") + colors["default"]);
-        Console.WriteLine(" (N) NEGATIVE FLAG:    " + colors["fgBlack"] + (negativeFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
-        Console.WriteLine(" (V) OVERFLOW FLAG:    " + colors["fgBlack"] + (overflowFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"]);
+        
+        // Flags
+        string carryFlagString = " (C) CARRY FLAG:       " + colors["fgBlack"] + (carryFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"];
+        string zeroFlagString = "        (Z) ZERO FLAG:        " + colors["fgBlack"] + (zeroFlag ? colors["bgBrightGreen"] + "1"  : colors["bgBrightRed"] + "0") + colors["default"];
+        string negativeFlagString = " (N) NEGATIVE FLAG:    " + colors["fgBlack"] + (negativeFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"];
+        string overFlowFlagString = "        (V) OVERFLOW FLAG:    " + colors["fgBlack"] + (overflowFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"];
+        Console.WriteLine(carryFlagString + zeroFlagString);
+        Console.WriteLine(negativeFlagString + overFlowFlagString);
+        
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" [UP]          INCREMENT             (N,Z)");
-        Console.WriteLine(" [DOWN]        DECREMENT             (N,Z)");
-        Console.WriteLine(" [LEFT]        ARITHMETIC SHIFT LEFT (N,Z,C)");
-        Console.WriteLine(" [RIGHT]       LOGICAL SHIFT RIGHT   (N,Z,C)");
-        Console.WriteLine(" [S+LEFT]      ROTATE LEFT           (N,Z,C)");
-        Console.WriteLine(" [S+RIGHT]     ROTATE RIGHT          (N,Z,C)");
-        Console.WriteLine(" [0] - [7]     EXCLUSIVE OR          (N,Z)");
-        Console.WriteLine(" [S+A] - [S+H] ADD WITH CARRY        (N,V,Z,C)");
-        Console.WriteLine(" [C+A] - [C+H] SUBTRACT WITH CARRY   (N,V,Z,C)");
-        Console.WriteLine(" [A] - [H]     CHANGE ACTIVE REGISTER");
-        Console.WriteLine(" [Q]           QUIT PROGRAM");
+        
+        // Message log
+        Console.WriteLine(messageLog.Count > 7 ? " " + messageLog[messageLog.Count-8] : " -");
+        Console.WriteLine(messageLog.Count > 6 ? " " + messageLog[messageLog.Count-7] : " -");
+        Console.WriteLine(messageLog.Count > 5 ? " " + messageLog[messageLog.Count-6] : " -");
+        Console.WriteLine(messageLog.Count > 4 ? " " + messageLog[messageLog.Count-5] : " -");
+        Console.WriteLine(messageLog.Count > 3 ? " " + messageLog[messageLog.Count-4] : " -");
+        Console.WriteLine(messageLog.Count > 2 ? " " + messageLog[messageLog.Count-3] : " -");
+        Console.WriteLine(messageLog.Count > 1 ? " " + messageLog[messageLog.Count-2] : " -");
+        Console.WriteLine(messageLog.Count > 0 ? " " + messageLog.Last() : " -");
+        
+        Console.WriteLine(seperatorLine);
+        
+        // Keyboard shortcuts
+        Console.WriteLine(" [UP]              INCREMENT                  (N,Z)");
+        Console.WriteLine(" [DOWN]            DECREMENT                  (N,Z)");
+        Console.WriteLine(" [LEFT]            ARITHMETIC SHIFT LEFT      (N,Z,C)");
+        Console.WriteLine(" [RIGHT]           LOGICAL SHIFT RIGHT        (N,Z,C)");
+        Console.WriteLine(" [S+LEFT]          ROTATE LEFT                (N,Z,C)");
+        Console.WriteLine(" [S+RIGHT]         ROTATE RIGHT               (N,Z,C)");
+        Console.WriteLine(" [0] - [7]         EXCLUSIVE OR               (N,Z)");
+        Console.WriteLine(" [S+A] - [S+H]     ADD WITH CARRY             (N,V,Z,C)");
+        Console.WriteLine(" [C+A] - [C+H]     SUBTRACT WITH CARRY        (N,V,Z,C)");
+        Console.WriteLine(" [A] - [H]         CHANGE ACTIVE REGISTER");
+        Console.WriteLine(" [Q]               QUIT PROGRAM");
     }
     
     // Main loop
