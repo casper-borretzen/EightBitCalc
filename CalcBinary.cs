@@ -3,7 +3,7 @@
 // Change various ints -> byte
 // Find hotkeys/modifier for SubtractRegister (atm it is ctrl, but doesn't work so well)
 
-class CalcBinary
+class BinaryCalc
 {
     // Set global constants
     private const char EMPTY = ' ';
@@ -489,7 +489,7 @@ class CalcBinary
     }
    
     // Class constructor
-    public CalcBinary()
+    public BinaryCalc()
     {
         Init();
         Run();
