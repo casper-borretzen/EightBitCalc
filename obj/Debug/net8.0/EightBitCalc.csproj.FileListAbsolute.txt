@@ -1,0 +1,15 @@
+D:\git\EightBitCalc\bin\Debug\net8.0\EightBitCalc.exe
+D:\git\EightBitCalc\bin\Debug\net8.0\EightBitCalc.deps.json
+D:\git\EightBitCalc\bin\Debug\net8.0\EightBitCalc.runtimeconfig.json
+D:\git\EightBitCalc\bin\Debug\net8.0\EightBitCalc.dll
+D:\git\EightBitCalc\bin\Debug\net8.0\EightBitCalc.pdb
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.GeneratedMSBuildEditorConfig.editorconfig
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.AssemblyInfoInputs.cache
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.AssemblyInfo.cs
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.csproj.CoreCompileInputs.cache
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.sourcelink.json
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.dll
+D:\git\EightBitCalc\obj\Debug\net8.0\refint\EightBitCalc.dll
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.pdb
+D:\git\EightBitCalc\obj\Debug\net8.0\EightBitCalc.genruntimeconfig.cache
+D:\git\EightBitCalc\obj\Debug\net8.0\ref\EightBitCalc.dll

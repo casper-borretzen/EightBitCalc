@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "D:\\git\\EightBitCalc\\JobLoopProject.csproj": {}
+    "D:\\git\\EightBitCalc\\BinaryCalc.csproj": {}
   },
   "projects": {
-    "D:\\git\\EightBitCalc\\JobLoopProject.csproj": {
+    "D:\\git\\EightBitCalc\\BinaryCalc.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\git\\EightBitCalc\\JobLoopProject.csproj",
-        "projectName": "JobLoopProject",
-        "projectPath": "D:\\git\\EightBitCalc\\JobLoopProject.csproj",
+        "projectUniqueName": "D:\\git\\EightBitCalc\\BinaryCalc.csproj",
+        "projectName": "BinaryCalc",
+        "projectPath": "D:\\git\\EightBitCalc\\BinaryCalc.csproj",
         "packagesPath": "C:\\Users\\LASER_WOLF\\.nuget\\packages\\",
         "outputPath": "D:\\git\\EightBitCalc\\obj\\",
         "projectStyle": "PackageReference",

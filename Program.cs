@@ -1,9 +1,9 @@
-﻿namespace JobLoopProject;
+﻿namespace EightBitCalc;
 
 class Program
 {
     static void Main(string[] args)
     {
-        EightBitCalc eightBitCalc = new EightBitCalc();
+        BinaryCalc binaryCalc = new BinaryCalc();
     }
 }

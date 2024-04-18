@@ -1,0 +1,15 @@
+D:\git\EightBitCalc\bin\Debug\net8.0\BinaryCalc.exe
+D:\git\EightBitCalc\bin\Debug\net8.0\BinaryCalc.deps.json
+D:\git\EightBitCalc\bin\Debug\net8.0\BinaryCalc.runtimeconfig.json
+D:\git\EightBitCalc\bin\Debug\net8.0\BinaryCalc.dll
+D:\git\EightBitCalc\bin\Debug\net8.0\BinaryCalc.pdb
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.GeneratedMSBuildEditorConfig.editorconfig
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.AssemblyInfoInputs.cache
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.AssemblyInfo.cs
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.csproj.CoreCompileInputs.cache
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.sourcelink.json
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.dll
+D:\git\EightBitCalc\obj\Debug\net8.0\refint\BinaryCalc.dll
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.pdb
+D:\git\EightBitCalc\obj\Debug\net8.0\BinaryCalc.genruntimeconfig.cache
+D:\git\EightBitCalc\obj\Debug\net8.0\ref\BinaryCalc.dll
