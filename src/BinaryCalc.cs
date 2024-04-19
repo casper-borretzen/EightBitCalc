@@ -14,7 +14,8 @@
     private const int CHAR_LIMIT = 8;
     private bool[,,] DIGITS = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
     private const string MAIN_TITLE = "8-BIT BINARY CALCULATOR";
-    private const int TOTAL_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
+    private const int RENDER_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
+    private const int RENDER_HEIGHT = 40;
     private const int REGISTER_NUM = 8;
 
     // Set global variables
@@ -23,6 +24,7 @@
     private List<string> messageLog = new List<string>();
     private string[] display = new string[CHAR_HEIGHT];
     private string seperatorLine = "";
+    private string blankLine = "";
     private byte[] registers = new byte[REGISTER_NUM];
     private byte[] registersPrev = new byte[REGISTER_NUM];
     private byte registerIndex = 0;
@@ -69,7 +71,7 @@
         {"bgWhite",         "\x1B[107m"},
     };
 
-    // Convert a byte to string
+    // Convert a byte to an eight digit string string
     private string ByteToString(byte bits)
     {
         return Convert.ToString(bits, 2).PadLeft(8, '0');
@@ -81,7 +83,7 @@
         return (char)((int)'A' + index);
     }
     
-    // Add message to the message log
+    // Add a message to the message log
     private void MessageAdd(string message)
     {
         messageLog.Add(DateTime.Now.ToString("HH:mm:ss") + " " + message.ToUpper());
@@ -92,9 +94,10 @@
     {
         MessageAdd("Welcome!");
 
-        // Make seperator line
-        for (int i = 0; i < CHAR_WIDTH * CHAR_LIMIT; i++)
+        // Make seperator and blank line
+        for (int i = 0; i < RENDER_WIDTH; i++)
         {
+            blankLine += ' ';
             seperatorLine += '-';
         }
 
@@ -139,7 +142,7 @@
         overflowFlag = false;
     }
 
-    // Check zero flag if value is zero
+    // Set zero flag if value is zero
     private void SetZeroFlag() 
     {
         if (registers[registerIndex] == 0b00000000) { zeroFlag = true; }
@@ -151,6 +154,7 @@
         if ((registers[registerIndex] & 0b10000000) == 0b10000000) { negativeFlag = true; }
     }
 
+    // Change active register
     private void ChangeRegister(byte targetRegister)
     {
         registerIndex = targetRegister;
@@ -289,7 +293,7 @@
         }
     }
 
-    // Handle input in main mode
+    // Handle input in the MAIN screen
     private bool GetInputMain(ConsoleKeyInfo key, bool modOne, bool modTwo)
     {
         // Check if the pressed key is a valid key
@@ -386,7 +390,7 @@
         return false;
     }
 
-    // Handle input in help mode
+    // Handle input in the HELP screen
     private bool GetInputHelp(ConsoleKeyInfo key, bool modOne, bool modTwo)
     {
         // Check if the pressed key is a valid key
@@ -414,15 +418,21 @@
             // Check if shift was pressed
             bool keyShift = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
             bool keyAlt = key.Modifiers.HasFlag(ConsoleModifiers.Alt);
-
-            // Main state
-            if (appState == STATE.MAIN) { validKey = GetInputMain(key, keyShift, keyAlt); }
             
-            // Help state
-            else if (appState == STATE.HELP) { validKey = GetInputHelp(key, keyShift, keyAlt); }
+            // Call the correct GetInput function for the current application STATE
+            switch (appState)
+            {
+                case STATE.MAIN:
+                    validKey = GetInputMain(key, keyShift, keyAlt);
+                    break;
+                case STATE.HELP:
+                    validKey = GetInputHelp(key, keyShift, keyAlt);
+                    break;
+            }
         }
     }
 
+    // Render the MAIN screen
     private void RenderMain()
     {
         // Format the display string
@@ -513,19 +523,12 @@
         Console.WriteLine(" [S+A] - [S+H]     ADD WITH CARRY             (N,V,Z,C)");
         Console.WriteLine(" [A+A] - [A+H]     SUBTRACT WITH CARRY        (N,V,Z,C)");
         Console.WriteLine(" [A] - [H]         CHANGE ACTIVE REGISTER");
-        Console.WriteLine(" [?]               HELP");
+        //Console.WriteLine(" [?]               HELP");
         Console.WriteLine(" [ESC]             QUIT PROGRAM");
     }
 
+    // Render the HELP screen
     private void RenderHelp(){
-        //Console.WriteLine();
-        //Console.WriteLine(" HELP SCREEN");
-        //Console.WriteLine(seperatorLine);
-        Console.WriteLine();
-        Console.WriteLine(" HELP SCREEN NOT FINISHED!! (WORK-IN-PROGRESS)");
-        Console.WriteLine();
-        Console.WriteLine(" BINARY NUMBERS ... SOMETHING SOMETHING ...");
-        Console.WriteLine(" ... BITS AND BYTES ...");
         Console.WriteLine();
         Console.WriteLine(" BASE-2 (BINARY) TO BASE-10 (DECIMAL):");
         Console.WriteLine("  128's  64's  32's  16's   8's   4's   2's   1's");
@@ -544,54 +547,124 @@
         Console.WriteLine("    1     1     1     1     1     1     1     1  =  -1");
         Console.WriteLine();
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" OPCODES:");
-        Console.WriteLine(" ADC");
-        Console.WriteLine(" ...");
+        Console.WriteLine(" ADC: ADD WITH CARRY        (N,V,Z,C)");
+        Console.WriteLine(" ADDS THE VALUE OF A CHOSEN REGISTER [A] - [H]");
+        Console.WriteLine(" TO THE CURRENT REGISTER");
+        Console.WriteLine();
+        Console.WriteLine(" SBC: SUBTRACT WITH CARRY   (N,V,Z,C)");
+        Console.WriteLine(" SUBTRACTS THE VALUE OF A CHOSEN REGISTER [A] - [H]");
+        Console.WriteLine(" FROM THE CURRENT REGISTER");
+        Console.WriteLine();
+        Console.WriteLine(" INC: INCREMENT             (N,Z)");
+        Console.WriteLine(" INCREMENTS THE VALUE OF THE CURRENT REGISTER BY 1");
+        Console.WriteLine();
+        Console.WriteLine(" DEC: DECREMENT             (N,Z)");
+        Console.WriteLine(" DECREMENTS THE VALUE OF THE CURRENT REGISTER BY 1");
+        Console.WriteLine();
+        Console.WriteLine(" ASL: ARITHMETIC SHIFT LEFT (N,Z,C)");
+        Console.WriteLine(" MOVES ALL BITS ONE STEP TO THE LEFT");
+        Console.WriteLine(" INSERTING A 0 IN THE RIGHTMOST BIT");
+        Console.WriteLine(" AND MOVING THE LEFTMOST BIT TO THE CARRY FLAG");
+        Console.WriteLine();
+        Console.WriteLine(" LSR: LOGICAL SHIFT RIGHT   (N,Z,C)");
+        Console.WriteLine(" MOVES ALL BITS ONE STEP TO THE RIGHT");
+        Console.WriteLine(" INSERTING A 0 IN THE LEFTMOST BIT");
+        Console.WriteLine(" AND MOVING THE RIGHTMOST BIT TO THE CARRY FLAG");
+        Console.WriteLine();
+        Console.WriteLine(" MULTIPLICATION AND DIVISION BY 2,4,6,8,16, ETC.");
+        Console.WriteLine(" CAN BE DONE WITH BITSHIFTING");
+        Console.WriteLine(" THE ASL OPERATION IS EQUIVALENT TO MULTIPLYING BY 2");
+        Console.WriteLine(" THE LSR OPERATION IS EQUIVALENT TO DIVIDING BY 2");
+        Console.WriteLine();
+        Console.WriteLine(" ROL: ROTATE LEFT           (N,Z,C)");
+        Console.WriteLine(" MOVES ALL BITS ONE STEP TO THE LEFT");
+        Console.WriteLine(" THE LEFTMOST BIT MOVES OVER TO THE RIGHTMOST SIDE");
+        Console.WriteLine();
+        Console.WriteLine(" ROR: ROTATE RIGHT          (N,Z,C)");
+        Console.WriteLine(" MOVES ALL BITS ONE STEP TO THE RIGHT");
+        Console.WriteLine(" THE RIGHTMOST BIT MOVES OVER TO THE LEFTMOST SIDE");
+        Console.WriteLine();
+        Console.WriteLine(" AND: LOGICAL AND           (N,Z)");
+        Console.WriteLine(" THE RESULT OF A LOGICAL AND IS ONLY TRUE");
+        Console.WriteLine(" IF BOTH INPUTS ARE TRUE");
+        Console.WriteLine();
+        Console.WriteLine(" EOR: EXCLUSIVE OR          (N,Z)");
+        Console.WriteLine(" AN EXCLUSIVE OR IS SIMILAR TO LOGICAL OR, WITH THE");
+        Console.WriteLine(" EXCEPTION THAT IS IS FALSE WHEN BOTH INPUTS ARE TRUE");
+        Console.WriteLine();
+        Console.WriteLine(" ORA: LOGICAL INCLUSIVE OR  (N,Z)");
+        Console.WriteLine(" THE RESULT OF A LOGICAL INCLUSIVE OR IS TRUE IF");
+        Console.WriteLine(" AT LEAST ONE OF THE INPUTS ARE TRUE");
+        Console.WriteLine();
+        Console.WriteLine(" AND CAN BE USED TO MASK BITS");
+        Console.WriteLine(" ALSO TO CHECK FOR EVEN/ODD NUMBERS");
+        Console.WriteLine(" ALSO TO CHECK IF A NUMBER IS DIVISIBLE BY 2/4/6/8 ETC.");
+        Console.WriteLine(" EOR CAN BE USED TO FLIP BITS");
+        Console.WriteLine(" ORA CAN BE USED TO SET A PARTICULAR BIT TO TRUE");
+        Console.WriteLine(" ORA + EOR CAN BE USED TO SET A PARTICULAR BIT TO FALSE");
+        Console.WriteLine();
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" FLAGS:");
-        Console.WriteLine(" (C)");
-        Console.WriteLine(" ...");
+        Console.WriteLine(" FLAGS ARE SET AFTER PERFORMING OPERATIONS");
+        Console.WriteLine(" FLAGS ARE INDICATED BY PARANTHESIS");
+        Console.WriteLine(" FOUR FLAGS ARE IMPLEMENTED:");
+        Console.WriteLine(" (C) CARRY FLAG");
+        Console.WriteLine(" (Z) ZERO FLAG:     IS SET TO 1 IF THE RESULT IS ZERO");
+        Console.WriteLine(" (O) OVERFLOW FLAG");
+        Console.WriteLine(" (N) NEGATIVE FLAG: IS SET TO 1 IF BIT 7 IS 1");
         Console.WriteLine(seperatorLine);
-        Console.WriteLine(" REGISTERS:");
-        Console.WriteLine(" [A]");
-        Console.WriteLine(" ...");
+        Console.WriteLine(" A REGISTER HOLDS ONE BYTE OF DATA");
+        Console.WriteLine(" REGISTERS ARE INDICATED BY SQUARE BRACKETS");
+        Console.WriteLine(" EIGHT REGISTERS [A] TO [H] ARE IMPLEMENTED");
         Console.WriteLine(seperatorLine);
         Console.WriteLine(" KEYBINDINGS AND MODIFIERS:");
         Console.WriteLine(" <KEY>");
         Console.WriteLine(" ...");
         Console.WriteLine(seperatorLine);
         Console.WriteLine(" PRESS [ESC] TO EXIT");
+        //54
     }
 
     // Render the result on screen
     private void Render()
     {
-        // Clear console
-        Console.CursorVisible = false;
-        Console.Clear();
+
+        // Clear the console
+        Console.SetCursorPosition(0,0);
+        for (int i = 0; i < RENDER_HEIGHT; i++){
+            Console.WriteLine(blankLine);
+        }
+        Console.SetCursorPosition(0,0);
 
         // Main title
         Console.WriteLine();
-        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((TOTAL_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(TOTAL_WIDTH, ' ') + colors["default"]);
+        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((RENDER_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(RENDER_WIDTH, ' ') + colors["default"]);
       
-        // Main state
-        if (appState == STATE.MAIN) { RenderMain(); }
-
-        // Help state
-        else if (appState == STATE.HELP) { RenderHelp(); }
+        // Call the correct Render function for the current application STATE
+        switch (appState)
+        {
+            case STATE.MAIN:
+                RenderMain();
+                break;
+            case STATE.HELP:
+                RenderHelp();
+                break;
+        }
     }
     
     // Main loop
     private void Run()
     {
+        // Clear console and hide cursor
+        Console.CursorVisible = false;
+        Console.Clear();
+        
         while (running == true)
         {
-
             Render();
             GetInput();
         }
 
-        // Exit the program and clear the console
+        // Exit the program and reset the console
         Console.WriteLine(colors["default"]);
         Console.CursorVisible = true;
         Console.Clear();

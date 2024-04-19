@@ -1,3 +1,10 @@
+v3
+ - Removed Console.Clear for every render call, replaced with setting the cursor
+   to position 0,0 and drawing a fixed number (40) of blank lines every render call
+ - Added some more info to the HELP screen
+ - The [?] HELP hotkey display is removed (until the HELP screen is completed, 
+   the HELP screen can still be accessed by pressing ? though)
+
 v2
  - Added highlighting of the bits changed during the last operation
  - Only refresh render if input is valid

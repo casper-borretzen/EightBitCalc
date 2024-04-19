@@ -2,6 +2,18 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
+ - Better rendering system:
+    X Replace the Console.Clear way of clearing the screen (not performant, flickers) 
+    X Render every line blank at every render call
+    + Check window width/height on application start
+    + Implement frame buffer
+    + Check for window resize
+    + Add containers
+      + Add scrolling if content is too big to fit inside container
+    + Make seperate RenderCLI class
+      + A generic class for rendering CLI applications, reusable for other projects
+      + Transfer existing code to that class
+
  - State machine:
     + Main states:
       X Main
@@ -17,7 +29,10 @@
     + Explain [A] Registers
     + Explain <KEY> Keybinds and modifiers
     + Explain binary number system (base-2) and show decimal value of each bit
- 
+
+ - Make seperate class for handling user input (GetInputCLI)
+   + A generic class for handling input in CLI applications, reusable for other projects
+
  - Better keybindings!
     MOD:  KEY:       ACTION:
      -    <UP>       INC
@@ -40,7 +55,12 @@
     ALT = $2 MODE ($0 IF IN $2 MODE)
     SHIFT + ALT = $3 MODE ($0 IF IN $3 MODE)
 
- - Better logging system (logger class? or struct?)
+ - Make a CLIApplication class
+   + A generic class for CLI applications
+   + Move RenderCLI and GetInputCLI to the new class
+
+ - Better logging system
+    + Make a seperate logger class
     + split logging to:
       + timestamp
       + assembly code
@@ -48,7 +68,7 @@
     + (optional) Save message log to file as assembly code "calc.asm"
 
  - Flags:
-    + Put all flags in a dictionary? Or make flags class or struct?
+    + Put all flags in a dictionary? Or make flags struct?
     + Are flags modelled correctly? Probably not, needs to be checked
     + Add support for manual/auto flag mode (flags auto clear)
     + Add new operation: CLC
@@ -56,7 +76,8 @@
     + Add new operation: CLV
 
  - Settings menu:
-    + Put all settings in a dictionary?
+    + Put all settings in a dictionary? or a struct?
+    + Save settings to file? (JSON?)
     + Save assembly code to file? (Y/N)
     + Auto set carry flag? (Y/N)
     + Highlight changed bits? (Y/N)
