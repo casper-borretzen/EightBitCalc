@@ -1,0 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+// NOTES
+///////////////////////////////////////////////////////////////////////////////
+
+ - Bitwise and shift operators:
+   https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators
+
+ - ConsoleKey Enum:
+   https://learn.microsoft.com/en-us/dotnet/api/system.consolekey
+
+ - Console color codes:
+   https://ss64.com/nt/syntax-ansi.html
