@@ -1,3 +1,9 @@
+v5
+ - Container class:
+   + Added display of scroll index/max for containers
+   + Scroll index resets on STATE change
+   + Start scroll index at max (for ASSEMBLY log)
+   + Add optional line numbering (for ASSEMBLY log)
 v4
  - Added error handling and error STATE
  - Added check of window size and throwing error if window size is too small

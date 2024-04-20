@@ -2,7 +2,21 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
- - The code is starting to grow in size time to split up into multiple files!
+ - Split container class into two classes with shared base class (the current structure is bad)
+
+ - Implement better solution for automatically adding one space left side padding
+
+ - Container class
+    X Implement two types of Container
+      X SCROLL for scrollable container
+      + SELECTION for container with selectable elements
+    X Add display of scroll index/max
+    X Scroll index reset on state change
+    X Start scroll index at max (for ASSEMBLY log)
+    X Add optional line numbering (for ASSEMBLY log)
+    - Change fg color for line numbers
+
+ - The code is starting to grow in size so it's time to split up into multiple files!
  
  - Improve text on help screen
 
@@ -36,7 +50,7 @@
       + timestamp
       + assembly code
       + user friendly text
-    + (optional) Save message log to file as assembly code "calc.asm"
+    + Save assembly log to file as "calc.asm"
 
  - Flags:
     + Put all flags in a dictionary? Or make flags struct?
@@ -47,7 +61,7 @@
     + Add new operation: CLV
 
  - Settings menu:
-    + Put all settings in a dictionary? or a struct?
+    + Put all settings in a dictionary?
     + Save settings to file? (JSON?)
     + Save assembly code to file? (Y/N)
     + Auto set carry flag? (Y/N)

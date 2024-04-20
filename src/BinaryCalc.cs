@@ -2,38 +2,75 @@
 {
     // A scrollable container to hold lines to be rendered on screen
     class Container {
-        private int scrollPos = 0;
-        private int scrollMax = 0;
+        public enum TYPE
+        {
+            SCROLL,
+            SELECTION
+        };
+        private int selPos = 0;
+        private int selMax = 0;
         private int size = 0;
         private List<string> content = new List<string>();
+        private Dictionary<string, bool> linkedDict = new Dictionary<string, bool>();
+        private TYPE containerType = TYPE.SCROLL;
+        private bool selDefaultMax = false;
+        private bool showLineNum = false;
       
         // Set the max scroll value
-        private void SetScrollMax()
+        private void SetSelMax()
         {
-            scrollMax = (content.Count - size) > 0 ? (content.Count - size) : 0;
+            selMax = (content.Count - size) > 0 ? (content.Count - size) : 0;
         }
 
         // Set content of the container
         public void SetContent(List<string> newContent)
         {
             content = newContent;
-            SetScrollMax();
+            SetSelMax();
         }
 
         // Add line to content
         public void AddContent(string newLine)
         {
             content.Add(newLine);
-            SetScrollMax();
+            SetSelMax();
+        }
+
+        public void LinkDictionary(Dictionary<string, bool> newLinkedDict)
+        {
+            linkedDict = newLinkedDict;
+        }
+
+        // Toggle the bool value for the currently selected item
+        public bool SelToggle()
+        {
+            if (containerType == TYPE.SELECTION)
+            {
+                linkedDict[linkedDict.ElementAt(selPos).Key] = !linkedDict.ElementAt(selPos).Value;
+                return true;
+            }
+            return false;
+        }
+
+        // Get the sel pos and max sel
+        public string GetSelPos()
+        {
+            return selMax == 0 ? "" : "(" + (selPos.ToString()).PadLeft(2,'0') + "/" + (selMax.ToString()).PadLeft(2,'0') + ")";
+        }
+
+        public void ZeroSelPos()
+        {
+            if (selDefaultMax) { selPos = selMax; }
+            else { selPos = 0; }
         }
 
         // Try to scroll the content up
-        public bool ScrollUp()
+        public bool SelUp()
         {
-            if (scrollPos > 0) 
+            if (selPos > 0) 
             { 
                 // Scroll up is possible
-                scrollPos--; 
+                selPos--; 
                 return true; 
             }
 
@@ -42,12 +79,12 @@
         }
 
         // Try to scroll the content down
-        public bool ScrollDown()
+        public bool SelDown()
         {
-            if (scrollPos < scrollMax) 
+            if (selPos < selMax) 
             { 
                 // Scroll down is possible
-                scrollPos++; 
+                selPos++; 
                 return true;
             } 
 
@@ -55,29 +92,98 @@
             return false;
         }
 
-        // Render the content of the container
-        public void Render()
+        // If there is no content show empty text
+        private void RenderEmpty()
         {
-            for (int i = scrollPos; i < scrollPos + size; i++)
+            for (int i = 0; i < size; i++)
             {
-                string line = "";
-
-                // If there is no content show empty text
-                if (i == 0 && content.Count == 0)
-                {
-                    line = "-";
-                }
-
-                // Render content
-                if (i < content.Count) { line = content[i]; }
-                Console.WriteLine(line);
+                if (i == 0) { Console.WriteLine(" -"); }
+                else {Console.WriteLine(); }
             }
         }
 
-        // Constructor
-        public Container(int newSize = 10)
+        // Render the content of a SCROLL type container
+        private void RenderScroll()
         {
-            size = newSize;
+            for (int i = selPos; i < selPos + size; i++)
+            {
+                if (i < content.Count)
+                {
+                    string line =  content[i]; 
+                
+                    // Show line number if enabled
+                    if (showLineNum)
+                    {
+                        int lineNumDigits = (content.Count).ToString().Length;
+                        line = " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + line;
+                    }
+
+                    // Render content
+                    Console.WriteLine(line);
+                }
+
+                // Empty lines
+                else { Console.WriteLine(); }
+            }
+        }
+        
+        // Render the content of a SELECTION type container
+        private void RenderSelection()
+        {
+            for (int i = selPos; i < selPos + size; i++)
+            {
+                if (i < content.Count)
+                {
+                    string line = " " + (i == selPos ? "<" : " ") + " [" + (linkedDict.ElementAt(i).Value == true ? "X" : "-") + "] " + (i == selPos ? ">" : " ") + " " + content[i];
+                
+                    // Show line number if enabled
+                    if (showLineNum)
+                    {
+                        int lineNumDigits = (content.Count).ToString().Length;
+                        line = " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + line;
+                    }
+
+                    // Render content
+                    Console.WriteLine(line);
+                }
+
+                // Empty lines
+                else { Console.WriteLine(); }
+            }
+        }
+
+        // Render the content of the container
+        public void Render()
+        {
+            // Check if there is content and show empty screen if content is empty
+            if (content.Count == 0) { RenderEmpty(); }
+
+            // If there is content render it
+            else {
+                switch (containerType)
+                {
+                    case TYPE.SCROLL:
+                        RenderScroll();
+                        break;
+                    case TYPE.SELECTION:
+                        RenderSelection();
+                        break;
+                }
+            }
+
+        }
+
+        // Constructor
+        public Container(
+                int size = 10, 
+                TYPE containerType = TYPE.SCROLL, 
+                bool selDefaultMax = false,
+                bool showLineNum = false)
+        {
+            this.size = size;
+            this.containerType = containerType;
+            this.selDefaultMax = selDefaultMax;
+            this.showLineNum = showLineNum;
         }
     }
 
@@ -101,7 +207,7 @@
     private bool[,,] DIGITS = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
     private const string MAIN_TITLE = "8-BIT BINARY CALCULATOR";
     private const int RENDER_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
-    private const int RENDER_HEIGHT = 42;
+    private const int RENDER_HEIGHT = 43;
     private const int REGISTER_NUM = 8;
 
     // Set global variables
@@ -121,12 +227,19 @@
     private bool overflowFlag = false;
     private int windowWidth = 0;
     private int windowHeight = 0;
+    private Dictionary<string, bool> settings = new Dictionary<string, bool>
+    {
+        { "uiHlChangedBit", true },
+        { "flagAutoCarry",  true },
+        { "loggerAsmFile",  true }
+    }; 
 
     // Create a dictionary of containers
     Dictionary<STATE, Container> containers = new Dictionary<STATE, Container>
     {
-        { STATE.HELP, new Container(RENDER_HEIGHT - 7)},
-        { STATE.ASSEMBLY, new Container(RENDER_HEIGHT - 7)}
+        { STATE.HELP, new Container(RENDER_HEIGHT - 7) },
+        { STATE.SETTINGS, new Container(RENDER_HEIGHT - 7, Container.TYPE.SELECTION) },
+        { STATE.ASSEMBLY, new Container(RENDER_HEIGHT - 7, selDefaultMax: true, showLineNum: true) }
     };
 
     // Set error types
@@ -179,6 +292,9 @@
     {
         appStatePrev = appState;
         appState = newState;
+
+        // Reset sel position for container
+        if (containers.ContainsKey(newState)) { containers[newState].ZeroSelPos(); }
     }
 
     // Check console window size in rows and columns
@@ -225,7 +341,7 @@
     // Add assembly code to the assembly log
     private void AssemblyAdd(string assembly)
     {
-        containers[STATE.ASSEMBLY].AddContent(" " + assembly);
+        containers[STATE.ASSEMBLY].AddContent(assembly);
     }
 
     // Initialize values
@@ -271,6 +387,14 @@
         DIGITS[1,6,1] = true;
         DIGITS[1,6,2] = true;
         DIGITS[1,6,3] = true;
+
+        containers[STATE.SETTINGS].SetContent(new List <string>
+        {
+            "Highlight changed bit",
+            "(not implemented) Automatically set/clear carry",
+            "(not implemented) Save assembly log to file"
+        });
+        containers[STATE.SETTINGS].LinkDictionary(settings);
         
         containers[STATE.HELP].SetContent(new List<string> 
         {
@@ -662,9 +786,9 @@
         switch (key.Key)
         {
             case ConsoleKey.UpArrow:
-                return containers[STATE.HELP].ScrollUp();
+                return containers[STATE.HELP].SelUp();
             case ConsoleKey.DownArrow:
-                return containers[STATE.HELP].ScrollDown();
+                return containers[STATE.HELP].SelDown();
             case ConsoleKey.Escape:
                 ChangeState(STATE.MAIN);
                 return true;
@@ -680,6 +804,14 @@
         // Check if the pressed key is a valid key
         switch (key.Key)
         {
+            case ConsoleKey.UpArrow:
+                return containers[STATE.SETTINGS].SelUp();
+            case ConsoleKey.DownArrow:
+                return containers[STATE.SETTINGS].SelDown();
+            case ConsoleKey.LeftArrow:
+                return containers[STATE.SETTINGS].SelToggle();
+            case ConsoleKey.RightArrow:
+                return containers[STATE.SETTINGS].SelToggle();
             case ConsoleKey.Escape:
                 ChangeState(STATE.MAIN);
                 return true;
@@ -696,9 +828,9 @@
         switch (key.Key)
         {
             case ConsoleKey.UpArrow:
-                return containers[STATE.ASSEMBLY].ScrollUp();
+                return containers[STATE.ASSEMBLY].SelUp();
             case ConsoleKey.DownArrow:
-                return containers[STATE.ASSEMBLY].ScrollDown();
+                return containers[STATE.ASSEMBLY].SelDown();
             case ConsoleKey.Escape:
                 ChangeState(STATE.MAIN);
                 return true;
@@ -715,6 +847,7 @@
         switch (key.Key)
         {
             case ConsoleKey.Enter:
+                Console.Clear();
                 return true;
             case ConsoleKey.Escape:
                 running = false;
@@ -815,7 +948,7 @@
                 bool bitChanged = (registers[registerIndex] & bitToCheck) != (registersPrev[registerIndex] & bitToCheck);
                 
                 // Set the value of the current "pixel"
-                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? bitChanged ? colors["fgBrightYellow"] + FILLED + colors["default"] : FILLED : EMPTY;
+                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? (bitChanged && settings["uiHlChangedBit"]) ? colors["fgBrightYellow"] + FILLED + colors["default"] : FILLED : EMPTY;
             }
 
             // Render the results of the current row
@@ -865,7 +998,8 @@
         Console.WriteLine(" <M>               ASSEMBLY LOG");
         Console.WriteLine(" <?>               HELP");
         Console.WriteLine(" <S>               SETTINGS");
-        Console.WriteLine(" <ESC>             QUIT PROGRAM");
+        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(" PRESS <ESC> TO QUIT PROGRAM");
     }
 
     // Render the HELP screen
@@ -882,7 +1016,7 @@
 
         // Show keybinds
         Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO EXIT");
+        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containers[STATE.HELP].GetSelPos().PadLeft(17));
     }
     
     // Render the SETTINGS screen
@@ -891,19 +1025,15 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + colors["bgBrightMagenta"] + colors["fgBlack"] + " SETTINGS " + colors["default"] + "         <UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(" " + colors["bgBrightMagenta"] + colors["fgBlack"] + " SETTINGS " + colors["default"] + "   <UP> SELECTION UP / <DOWN> SELECTION DOWN");
         Console.WriteLine(seperatorLine[0]);
 
-        Console.WriteLine(" NO SETTINGS YET");
-
-        for (int i = 0; i < RENDER_HEIGHT - 8; i++)
-        {
-            Console.WriteLine();
-        }
+        // Render the SETTINGS container
+        containers[STATE.SETTINGS].Render();
 
         // Show keybinds
         Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO EXIT");
+        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN");
     }
 
     // Render the ASSEMBLY screen
@@ -920,7 +1050,7 @@
 
         // Show keybinds
         Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO EXIT");
+        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containers[STATE.ASSEMBLY].GetSelPos().PadLeft(17));
     }
 
     // Render the ERROR screen
