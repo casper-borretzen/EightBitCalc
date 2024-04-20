@@ -2,36 +2,11 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
- - Better rendering system:
-    X Replace the Console.Clear way of clearing the screen (not performant, flickers) 
-    X Render every line blank at every render call
-    + Check window width/height on application start
-    + Implement frame buffer
-    + Check for window resize
-    + Add containers
-      + Add scrolling if content is too big to fit inside container
-    + Make seperate RenderCLI class
-      + A generic class for rendering CLI applications, reusable for other projects
-      + Transfer existing code to that class
+ - The code is starting to grow in size time to split up into multiple files!
+ 
+ - Improve text on help screen
 
- - State machine:
-    + Main states:
-      X Main
-      X Help
-      + Settings
-    + Sub states:
-      + Main -> (1st) Normal
-      + Main -> (2nd) Command
-
- - Add "Help" screen
-    + Explain opcodes and operations
-    + Explain (C) Flags
-    + Explain [A] Registers
-    + Explain <KEY> Keybinds and modifiers
-    + Explain binary number system (base-2) and show decimal value of each bit
-
- - Make seperate class for handling user input (GetInputCLI)
-   + A generic class for handling input in CLI applications, reusable for other projects
+ - Check if ASSEMBLY logging is correct (changing registers?)
 
  - Better keybindings!
     MOD:  KEY:       ACTION:
@@ -54,10 +29,6 @@
     SHIFT = $1 MODE ($0 IF IN $1 MODE)
     ALT = $2 MODE ($0 IF IN $2 MODE)
     SHIFT + ALT = $3 MODE ($0 IF IN $3 MODE)
-
- - Make a CLIApplication class
-   + A generic class for CLI applications
-   + Move RenderCLI and GetInputCLI to the new class
 
  - Better logging system
     + Make a seperate logger class
@@ -106,6 +77,21 @@
     + T<FIRST REGISTER><SECOND REGISTER> (e.g. TAB -> TRANSFER A TO B)
 
  - UI overhaul
+
+ - Make seperate class for handling user input (GetInputCLI)
+   + A generic class for handling input in CLI applications, reusable for other projects
+
+ - Make seperate RenderCLI class
+    + A generic class for rendering CLI applications, reusable for other projects
+    + Transfer existing render code to that class
+ 
+ - Make a CLIApplication class
+   + A generic class for CLI applications
+   + Move RenderCLI and GetInputCLI to the new class
+
+ ? Add debug mode
+
+ ? Add frame buffer
 
  ? Change display datatype: string[] display -> bool[,] display
 

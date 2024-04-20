@@ -1,3 +1,12 @@
+v4
+ - Added error handling and error STATE
+ - Added check of window size and throwing error if window size is too small
+ - Added a new class Container for holding scrollable lines of text
+ - Implemented the Container class in the HELP screen
+ - Rewrote the HELP screen a bit. The text is still unfinished though.
+ - Added ASSEMBLY state with assembly code log using the Container class
+ - Added SETTINGS state that is empty for now
+
 v3
  - Removed Console.Clear for every render call, replaced with setting the cursor
    to position 0,0 and drawing a fixed number (40) of blank lines every render call
