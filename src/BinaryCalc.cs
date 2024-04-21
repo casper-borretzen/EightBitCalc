@@ -1,192 +1,5 @@
 ﻿class BinaryCalc
 {
-    // A scrollable container to hold lines to be rendered on screen
-    class Container {
-        public enum TYPE
-        {
-            SCROLL,
-            SELECTION
-        };
-        private int selPos = 0;
-        private int selMax = 0;
-        private int size = 0;
-        private List<string> content = new List<string>();
-        private Dictionary<string, bool> linkedDict = new Dictionary<string, bool>();
-        private TYPE containerType = TYPE.SCROLL;
-        private bool selDefaultMax = false;
-        private bool showLineNum = false;
-      
-        // Set the max scroll value
-        private void SetSelMax()
-        {
-            selMax = (content.Count - size) > 0 ? (content.Count - size) : 0;
-        }
-
-        // Set content of the container
-        public void SetContent(List<string> newContent)
-        {
-            content = newContent;
-            SetSelMax();
-        }
-
-        // Add line to content
-        public void AddContent(string newLine)
-        {
-            content.Add(newLine);
-            SetSelMax();
-        }
-
-        public void LinkDictionary(Dictionary<string, bool> newLinkedDict)
-        {
-            linkedDict = newLinkedDict;
-        }
-
-        // Toggle the bool value for the currently selected item
-        public bool SelToggle()
-        {
-            if (containerType == TYPE.SELECTION)
-            {
-                linkedDict[linkedDict.ElementAt(selPos).Key] = !linkedDict.ElementAt(selPos).Value;
-                return true;
-            }
-            return false;
-        }
-
-        // Get the sel pos and max sel
-        public string GetSelPos()
-        {
-            return selMax == 0 ? "" : "(" + (selPos.ToString()).PadLeft(2,'0') + "/" + (selMax.ToString()).PadLeft(2,'0') + ")";
-        }
-
-        public void ZeroSelPos()
-        {
-            if (selDefaultMax) { selPos = selMax; }
-            else { selPos = 0; }
-        }
-
-        // Try to scroll the content up
-        public bool SelUp()
-        {
-            if (selPos > 0) 
-            { 
-                // Scroll up is possible
-                selPos--; 
-                return true; 
-            }
-
-            // Scroll up not possible
-            return false;
-        }
-
-        // Try to scroll the content down
-        public bool SelDown()
-        {
-            if (selPos < selMax) 
-            { 
-                // Scroll down is possible
-                selPos++; 
-                return true;
-            } 
-
-            // Scoll down is not possible
-            return false;
-        }
-
-        // If there is no content show empty text
-        private void RenderEmpty()
-        {
-            for (int i = 0; i < size; i++)
-            {
-                if (i == 0) { Console.WriteLine(" -"); }
-                else {Console.WriteLine(); }
-            }
-        }
-
-        // Render the content of a SCROLL type container
-        private void RenderScroll()
-        {
-            for (int i = selPos; i < selPos + size; i++)
-            {
-                if (i < content.Count)
-                {
-                    string line =  content[i]; 
-                
-                    // Show line number if enabled
-                    if (showLineNum)
-                    {
-                        int lineNumDigits = (content.Count).ToString().Length;
-                        line = " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + line;
-                    }
-
-                    // Render content
-                    Console.WriteLine(line);
-                }
-
-                // Empty lines
-                else { Console.WriteLine(); }
-            }
-        }
-        
-        // Render the content of a SELECTION type container
-        private void RenderSelection()
-        {
-            for (int i = selPos; i < selPos + size; i++)
-            {
-                if (i < content.Count)
-                {
-                    string line = " " + (i == selPos ? "<" : " ") + " [" + (linkedDict.ElementAt(i).Value == true ? "X" : "-") + "] " + (i == selPos ? ">" : " ") + " " + content[i];
-                
-                    // Show line number if enabled
-                    if (showLineNum)
-                    {
-                        int lineNumDigits = (content.Count).ToString().Length;
-                        line = " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + line;
-                    }
-
-                    // Render content
-                    Console.WriteLine(line);
-                }
-
-                // Empty lines
-                else { Console.WriteLine(); }
-            }
-        }
-
-        // Render the content of the container
-        public void Render()
-        {
-            // Check if there is content and show empty screen if content is empty
-            if (content.Count == 0) { RenderEmpty(); }
-
-            // If there is content render it
-            else {
-                switch (containerType)
-                {
-                    case TYPE.SCROLL:
-                        RenderScroll();
-                        break;
-                    case TYPE.SELECTION:
-                        RenderSelection();
-                        break;
-                }
-            }
-
-        }
-
-        // Constructor
-        public Container(
-                int size = 10, 
-                TYPE containerType = TYPE.SCROLL, 
-                bool selDefaultMax = false,
-                bool showLineNum = false)
-        {
-            this.size = size;
-            this.containerType = containerType;
-            this.selDefaultMax = selDefaultMax;
-            this.showLineNum = showLineNum;
-        }
-    }
-
     // Set global enums
     private enum STATE 
     {
@@ -227,6 +40,8 @@
     private bool overflowFlag = false;
     private int windowWidth = 0;
     private int windowHeight = 0;
+    
+    // Settings
     private Dictionary<string, bool> settings = new Dictionary<string, bool>
     {
         { "uiHlChangedBit", true },
@@ -234,57 +49,27 @@
         { "loggerAsmFile",  true }
     }; 
 
-    // Create a dictionary of containers
-    Dictionary<STATE, Container> containers = new Dictionary<STATE, Container>
+    // Dictionaries for container content
+    List <string> help = new List<string>();
+    List <string> assembly = new List<string>();
+    
+    // Create scroll containers
+    Dictionary<STATE, ContainerScroll> containerScroll = new Dictionary<STATE, ContainerScroll>
     {
-        { STATE.HELP, new Container(RENDER_HEIGHT - 7) },
-        { STATE.SETTINGS, new Container(RENDER_HEIGHT - 7, Container.TYPE.SELECTION) },
-        { STATE.ASSEMBLY, new Container(RENDER_HEIGHT - 7, selDefaultMax: true, showLineNum: true) }
+        { STATE.HELP,     new ContainerScroll(RENDER_HEIGHT - 7) },
+        { STATE.ASSEMBLY, new ContainerScroll(RENDER_HEIGHT - 7, startAtBottom: true) }
+    };
+
+    // Create toggle containers
+    Dictionary<STATE, ContainerToggle> containerToggle = new Dictionary<STATE, ContainerToggle>
+    {
+        { STATE.SETTINGS, new ContainerToggle(RENDER_HEIGHT - 7) }
     };
 
     // Set error types
     Dictionary<string, bool> appError = new Dictionary<string, bool>
     {
         { "windowSize",     false }
-    };
-
-    // Set console colors
-    Dictionary<string, string> colors = new Dictionary<string, string> 
-    {
-        { "default",         "\x1B[0m"   },
-        { "ul",              "\x1B[4m"   },
-        { "fgBlack",         "\x1B[30m"  },
-        { "bgBlack",         "\x1B[40m"  },
-        { "fgDarkRed",       "\x1B[31m"  },
-        { "bgDarkRed",       "\x1B[41m"  },
-        { "fgDarkGreen",     "\x1B[32m"  },
-        { "bgDarkGreen",     "\x1B[42m"  },
-        { "fgDarkYellow",    "\x1B[33m"  },
-        { "bgDarkYellow",    "\x1B[43m"  },
-        { "fgDarkBlue",      "\x1B[34m"  },
-        { "bgDarkBlue",      "\x1B[44m"  },
-        { "fgDarkMagenta",   "\x1B[35m"  },
-        { "bgDarkMagenta",   "\x1B[45m"  },
-        { "fgDarkCyan",      "\x1B[36m"  },
-        { "bgDarkCyan",      "\x1B[46m"  },
-        { "fgDarkWhite",     "\x1B[37m"  },
-        { "bgDarkWhite",     "\x1B[47m"  },
-        { "fgBrightBlack",   "\x1B[90m"  },
-        { "bgBrightBlack",   "\x1B[100m" },
-        { "fgBrightRed",     "\x1B[91m"  },
-        { "bgBrightRed",     "\x1B[101m" },
-        { "fgBrightGreen",   "\x1B[92m"  },
-        { "bgBrightGreen",   "\x1B[102m" },
-        { "fgBrightYellow",  "\x1B[93m"  },
-        { "bgBrightYellow",  "\x1B[103m" },
-        { "fgBrightBlue",    "\x1B[94m"  },
-        { "bgBrightBlue",    "\x1B[104m" },
-        { "fgBrightMagenta", "\x1B[95m"  },
-        { "bgBrightMagenta", "\x1B[105m" },
-        { "fgBrightCyan",    "\x1B[96m"  },
-        { "bgBrightCyan",    "\x1B[106m" },
-        { "fgWhite",         "\x1B[97m"  },
-        { "bgWhite",         "\x1B[107m" },
     };
 
     // Change the app STATE
@@ -294,7 +79,8 @@
         appState = newState;
 
         // Reset sel position for container
-        if (containers.ContainsKey(newState)) { containers[newState].ZeroSelPos(); }
+        if (containerScroll.ContainsKey(newState)) { containerScroll[newState].Zero(); }
+        else if (containerToggle.ContainsKey(newState)) { containerToggle[newState].Zero(); }
     }
 
     // Check console window size in rows and columns
@@ -339,9 +125,9 @@
     }
     
     // Add assembly code to the assembly log
-    private void AssemblyAdd(string assembly)
+    private void AssemblyAdd(string line)
     {
-        containers[STATE.ASSEMBLY].AddContent(assembly);
+        containerScroll[STATE.ASSEMBLY].AddContent(line);
     }
 
     // Initialize values
@@ -388,15 +174,8 @@
         DIGITS[1,6,2] = true;
         DIGITS[1,6,3] = true;
 
-        containers[STATE.SETTINGS].SetContent(new List <string>
-        {
-            "Highlight changed bit",
-            "(not implemented) Automatically set/clear carry",
-            "(not implemented) Save assembly log to file"
-        });
-        containers[STATE.SETTINGS].LinkDictionary(settings);
-        
-        containers[STATE.HELP].SetContent(new List<string> 
+        // Set HELP text
+        help = new List<string> 
         {
             "",
             " TODO: ... ABOUT BINARY, BITS AND BYTES...",
@@ -420,7 +199,7 @@
             "",
             seperatorLine[1],
             "",
-            " " + colors["ul"] + "ADC: ADD WITH CARRY" + colors["default"] + "                          (N,V,Z,C)",
+            " " + COLORS.UL + "ADC: ADD WITH CARRY" + COLORS.DEFAULT + "                          (N,V,Z,C)",
             " ADDS THE VALUE OF A CHOSEN REGISTER [A] - [H]",
             " TO THE CURRENT REGISTER.",
             " THE (C)ARRY FLAG IS SET IF THE RESULTING VALUE",
@@ -428,7 +207,7 @@
             " THE O(V)ERFLOW FLAG IS SET IF ADDING TO A POSITIVE",
             " NUMBER AND ENDING UP WITH A NEGATIVE NUMBER.",
             "",
-            " " + colors["ul"] + "SBC: SUBTRACT WITH CARRY" + colors["default"] + "                     (N,V,Z,C)",
+            " " + COLORS.UL + "SBC: SUBTRACT WITH CARRY" + COLORS.DEFAULT + "                     (N,V,Z,C)",
             " SUBTRACTS THE VALUE OF A CHOSEN REGISTER [A] - [H]",
             " FROM THE CURRENT REGISTER.",
             " THE (C)ARRY FLAG IS CLEAR IF THE RESULTING VALUE",
@@ -436,33 +215,33 @@
             " THE O(V)ERFLOW FLAG IS SET IF SUBTRACTING FROM A",
             " NEGATIVE NUMBER AND ENDING UP WITH A POSITIVE NUMBER.",
             "",
-            " " + colors["ul"] + "INC: INCREMENT" + colors["default"] + "                               (N,Z)",
+            " " + COLORS.UL + "INC: INCREMENT" + COLORS.DEFAULT + "                               (N,Z)",
             " ADDS ONE TO THE VALUE OF THE CURRENT REGISTER.",
             "",
-            " " + colors["ul"] + "DEC: DECREMENT" + colors["default"] + "                               (N,Z)",
+            " " + COLORS.UL + "DEC: DECREMENT" + COLORS.DEFAULT + "                               (N,Z)",
             " SUBTRACTS ONE FROM THE VALUE OF THE CURRENT REGISTER.",
             "",
-            " " + colors["ul"] + "ASL: ARITHMETIC SHIFT LEFT" + colors["default"] + "                   (N,Z,C)",
+            " " + COLORS.UL + "ASL: ARITHMETIC SHIFT LEFT" + COLORS.DEFAULT + "                   (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE LEFT",
             " INSERTING A 0 IN THE RIGHTMOST BIT",
             " AND MOVING THE LEFTMOST BIT TO THE (C)ARRY FLAG.",
             " THIS OPERATION IS EQUIVALENT TO MULTIPLYING BY 2.",
             "",
-            " " + colors["ul"] + "LSR: LOGICAL SHIFT RIGHT" + colors["default"] + "                     (N,Z,C)",
+            " " + COLORS.UL + "LSR: LOGICAL SHIFT RIGHT" + COLORS.DEFAULT + "                     (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE RIGHT",
             " INSERTING A 0 IN THE LEFTMOST BIT",
             " AND MOVING THE RIGHTMOST BIT TO THE (C)ARRY FLAG.",
             " THIS OPERATION IS EQUIVALENT TO DIVIDING BY 2.",
             "",
-            " " + colors["ul"] + "ROL: ROTATE LEFT" + colors["default"] + "                             (N,Z,C)",
+            " " + COLORS.UL + "ROL: ROTATE LEFT" + COLORS.DEFAULT + "                             (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE LEFT",
             " THE LEFTMOST BIT MOVES OVER TO THE RIGHTMOST SIDE.",
             "",
-            " " + colors["ul"] + "ROR: ROTATE RIGHT" + colors["default"] + "                            (N,Z,C)",
+            " " + COLORS.UL + "ROR: ROTATE RIGHT" + COLORS.DEFAULT + "                            (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE RIGHT",
             " THE RIGHTMOST BIT MOVES OVER TO THE LEFTMOST SIDE.",
             "",
-            " " + colors["ul"] + "AND: LOGICAL AND" + colors["default"] + "                             (N,Z)",
+            " " + COLORS.UL + "AND: LOGICAL AND" + COLORS.DEFAULT + "                             (N,Z)",
             " THE RESULT OF A LOGICAL AND IS ONLY TRUE",
             " IF BOTH INPUTS ARE TRUE.",
             " CAN BE USED TO MASK BITS.",
@@ -470,12 +249,12 @@
             " CAN BE USED TO CHECK IF A NUMBER IS",
             " DIVISIBLE BY 2/4/6/8 ETC.",
             "",
-            " " + colors["ul"] + "EOR: EXCLUSIVE OR" + colors["default"] + "                            (N,Z)",
+            " " + COLORS.UL + "EOR: EXCLUSIVE OR" + COLORS.DEFAULT + "                            (N,Z)",
             " AN EXCLUSIVE OR IS SIMILAR TO LOGICAL OR, WITH THE",
             " EXCEPTION THAT IS IS FALSE WHEN BOTH INPUTS ARE TRUE.",
             " EOR CAN BE USED TO FLIP BITS.",
             "",
-            " " + colors["ul"] + "ORA: LOGICAL INCLUSIVE OR" + colors["default"] + "                    (N,Z)",
+            " " + COLORS.UL + "ORA: LOGICAL INCLUSIVE OR" + COLORS.DEFAULT + "                    (N,Z)",
             " THE RESULT OF A LOGICAL INCLUSIVE OR IS TRUE IF",
             " AT LEAST ONE OF THE INPUTS ARE TRUE.",
             " ORA CAN BE USED TO SET A PARTICULAR BIT TO TRUE.",
@@ -504,7 +283,18 @@
             " <KEY>",
             " ...",
             "",
-        });
+        };
+
+        //containers[STATE.SETTINGS].SetContent(new List <string>
+        //{
+        //    "Highlight changed bit",
+        //    "(not implemented) Automatically set/clear carry",
+        //    "(not implemented) Save assembly log to file"
+        //});
+        
+        containerScroll[STATE.HELP].LinkContent(help);
+        containerScroll[STATE.ASSEMBLY].LinkContent(assembly);
+        containerToggle[STATE.SETTINGS].LinkContent(settings);
     }
 
     // Unset all flags
@@ -786,9 +576,9 @@
         switch (key.Key)
         {
             case ConsoleKey.UpArrow:
-                return containers[STATE.HELP].SelUp();
+                return containerScroll[STATE.HELP].Up();
             case ConsoleKey.DownArrow:
-                return containers[STATE.HELP].SelDown();
+                return containerScroll[STATE.HELP].Down();
             case ConsoleKey.Escape:
                 ChangeState(STATE.MAIN);
                 return true;
@@ -805,13 +595,13 @@
         switch (key.Key)
         {
             case ConsoleKey.UpArrow:
-                return containers[STATE.SETTINGS].SelUp();
+                return containerToggle[STATE.SETTINGS].Up();
             case ConsoleKey.DownArrow:
-                return containers[STATE.SETTINGS].SelDown();
+                return containerToggle[STATE.SETTINGS].Down();
             case ConsoleKey.LeftArrow:
-                return containers[STATE.SETTINGS].SelToggle();
+                return containerToggle[STATE.SETTINGS].Toggle();
             case ConsoleKey.RightArrow:
-                return containers[STATE.SETTINGS].SelToggle();
+                return containerToggle[STATE.SETTINGS].Toggle();
             case ConsoleKey.Escape:
                 ChangeState(STATE.MAIN);
                 return true;
@@ -828,9 +618,9 @@
         switch (key.Key)
         {
             case ConsoleKey.UpArrow:
-                return containers[STATE.ASSEMBLY].SelUp();
+                return containerScroll[STATE.ASSEMBLY].Up();
             case ConsoleKey.DownArrow:
-                return containers[STATE.ASSEMBLY].SelDown();
+                return containerScroll[STATE.ASSEMBLY].Down();
             case ConsoleKey.Escape:
                 ChangeState(STATE.MAIN);
                 return true;
@@ -898,7 +688,7 @@
     private void RenderTitlebar()
     {
         Console.WriteLine();
-        Console.WriteLine(colors["fgBlack"] + colors["bgBrightCyan"] + (MAIN_TITLE.PadLeft((RENDER_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(RENDER_WIDTH, ' ') + colors["default"]);
+        Console.WriteLine(COLORS.FG_BLACK + COLORS.BG_BRIGHT_CYAN + (MAIN_TITLE.PadLeft((RENDER_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(RENDER_WIDTH, ' ') + COLORS.DEFAULT);
     }
 
     // Render the MAIN screen
@@ -916,9 +706,9 @@
         string registerLineHex = " ";
         for (byte i = 0; i < REGISTER_NUM; i++)
         {
-            if (i == registerIndex) { registerLine += colors["fgBlack"] + colors["bgBrightYellow"]; }
+            if (i == registerIndex) { registerLine += COLORS.FG_BLACK + COLORS.BG_BRIGHT_YELLOW; }
             registerLine += "  " + GetRegisterChar(i) + "  ";
-            if (i == registerIndex) { registerLine += colors["default"]; }
+            if (i == registerIndex) { registerLine += COLORS.DEFAULT; }
             registerLine += "  ";
             registerLineHex += " 0x" + registers[i].ToString("X2") + " ";
             registerLineHex += " ";
@@ -948,7 +738,7 @@
                 bool bitChanged = (registers[registerIndex] & bitToCheck) != (registersPrev[registerIndex] & bitToCheck);
                 
                 // Set the value of the current "pixel"
-                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? (bitChanged && settings["uiHlChangedBit"]) ? colors["fgBrightYellow"] + FILLED + colors["default"] : FILLED : EMPTY;
+                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? (bitChanged && settings["uiHlChangedBit"]) ? COLORS.FG_BRIGHT_YELLOW + FILLED + COLORS.DEFAULT : FILLED : EMPTY;
             }
 
             // Render the results of the current row
@@ -963,10 +753,10 @@
         Console.WriteLine(seperatorLine[0]);
         
         // Flags
-        string carryFlagString = " (C) CARRY FLAG:       " + colors["fgBlack"] + (carryFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"];
-        string zeroFlagString = "        (Z) ZERO FLAG:        " + colors["fgBlack"] + (zeroFlag ? colors["bgBrightGreen"] + "1"  : colors["bgBrightRed"] + "0") + colors["default"];
-        string negativeFlagString = " (N) NEGATIVE FLAG:    " + colors["fgBlack"] + (negativeFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"];
-        string overFlowFlagString = "        (V) OVERFLOW FLAG:    " + colors["fgBlack"] + (overflowFlag ? colors["bgBrightGreen"] + "1" : colors["bgBrightRed"] + "0") + colors["default"];
+        string carryFlagString = " (C) CARRY FLAG:       " + COLORS.FG_BLACK + (carryFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string zeroFlagString = "        (Z) ZERO FLAG:        " + COLORS.FG_BLACK + (zeroFlag ? COLORS.BG_BRIGHT_GREEN + "1"  : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string negativeFlagString = " (N) NEGATIVE FLAG:    " + COLORS.FG_BLACK + (negativeFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string overFlowFlagString = "        (V) OVERFLOW FLAG:    " + COLORS.FG_BLACK + (overflowFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
         Console.WriteLine(carryFlagString + zeroFlagString);
         Console.WriteLine(negativeFlagString + overFlowFlagString);
         
@@ -1008,15 +798,15 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + colors["bgBrightMagenta"] + colors["fgBlack"] + " HELP SCREEN " + colors["default"] + "      <UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " HELP SCREEN " + COLORS.DEFAULT + "      <UP> SCROLL UP / <DOWN> SCROLL DOWN");
         Console.WriteLine(seperatorLine[0]);
 
         // Render the HELP container
-        containers[STATE.HELP].Render();
+        containerScroll[STATE.HELP].Render();
 
         // Show keybinds
         Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containers[STATE.HELP].GetSelPos().PadLeft(17));
+        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containerScroll[STATE.HELP].GetScrollPos().PadLeft(17));
     }
     
     // Render the SETTINGS screen
@@ -1025,11 +815,11 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + colors["bgBrightMagenta"] + colors["fgBlack"] + " SETTINGS " + colors["default"] + "   <UP> SELECTION UP / <DOWN> SELECTION DOWN");
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " SETTINGS " + COLORS.DEFAULT + "   <UP> SELECTION UP / <DOWN> SELECTION DOWN");
         Console.WriteLine(seperatorLine[0]);
 
         // Render the SETTINGS container
-        containers[STATE.SETTINGS].Render();
+        containerToggle[STATE.SETTINGS].Render();
 
         // Show keybinds
         Console.WriteLine(seperatorLine[0]);
@@ -1042,15 +832,15 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + colors["bgBrightMagenta"] + colors["fgBlack"] + " ASSEMBLY LOG " + colors["default"] + "     <UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " ASSEMBLY LOG " + COLORS.DEFAULT + "     <UP> SCROLL UP / <DOWN> SCROLL DOWN");
         Console.WriteLine(seperatorLine[0]);
 
         // Render the ASSEMBLY container
-        containers[STATE.ASSEMBLY].Render();
+        containerScroll[STATE.ASSEMBLY].Render();
 
         // Show keybinds
         Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containers[STATE.ASSEMBLY].GetSelPos().PadLeft(17));
+        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containerScroll[STATE.ASSEMBLY].GetScrollPos().PadLeft(17));
     }
 
     // Render the ERROR screen
@@ -1118,7 +908,7 @@
         }
 
         // Exit the program and reset the console
-        Console.WriteLine(colors["default"]);
+        Console.WriteLine(COLORS.DEFAULT);
         Console.CursorVisible = true;
         Console.Clear();
     }
