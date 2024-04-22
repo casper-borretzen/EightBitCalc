@@ -4,7 +4,15 @@ v6
  - Made COLORS global variables
  - Added colors to line number in the ContainerScroll class
  - Added title, header and footer built into the Container class
- - Added Logger class for logging messages and ASSEMBLY lines
+ - Added CLC and SEC operations
+ - Reduced the number of registers to 3, similar to the 6502
+ - Reworked all operations and flags to behave similar to the 6502
+ - Implemented auto mode for carry flag setting
+ - Implemented highlight changed bits setting
+ - Implemented CLV, AND, ORA, LDA, LDX, LDY, STA, STX, STY, TAX, TAY, TXA, TYA operations
+ - Added substates to the MAIN state
+ - Redone keybindings
+ - Added ADD and SUBTRACT substates
  
 v5
  - Container class:

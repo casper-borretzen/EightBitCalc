@@ -6,58 +6,17 @@
 
  - Improve text on help screen
 
- - Check if ASSEMBLY logging is correct (changing registers?)
+ - Loading/storing opcodes: Add support for immediate, absolute, absolute index etc..
 
- - Better keybindings!
-    MOD:  KEY:       ACTION:
-     -    <UP>       INC
-     -    <DOWN>     DEC
-     $0   <LEFT>     ASL
-     $0   <RIGHT>    LSR
-     $1   <LEFT>     ROL
-     $1   <RIGHT>    ROR
-     $2   <LEFT>     CHANGE ACTIVE REGISTER <-
-     $2   <RIGHT>    CHANGE ACTIVE REGISTER ->
-     -    <0> - <7>  EOR
-     $0   <A> - <H>  CHANGE ACTIVE REGISTER
-     $1   <A> - <H>  ADC
-     $2   <A> - <H>  SBC
-     $3   <A> - <H>  TRANSFER FROM REGISTER TO ACTIVE REGISTER
-     -    <M>        CHANGE MODIFIER ($0,$1,$2,$3)
-     -    <Q>        QUIT
-    ------------------------------------------
-    SHIFT = $1 MODE ($0 IF IN $1 MODE)
-    ALT = $2 MODE ($0 IF IN $2 MODE)
-    SHIFT + ALT = $3 MODE ($0 IF IN $3 MODE)
+ - Add ui for memory
 
- - Better logging system
-    + Make a seperate logger class
-    + split logging to:
-      + timestamp
-      + assembly code
-      + user friendly text
-    + Save assembly log to file as "calc.asm"
+ - Add ui for DEFAULT/ADD/SUBTRACT substates
 
- - Flags:
-    + Put all flags in a dictionary? Or make flags struct?
-    + Are flags modelled correctly? Probably not, needs to be checked
-    + Add support for manual/auto flag mode (flags auto clear)
-    + Add new operation: CLC
-    + Add new operation: SEC
-    + Add new operation: CLV
+ - Add COMMAND substate
 
- - Settings menu:
-    + Put all settings in a dictionary?
-    + Save settings to file? (JSON?)
-    + Save assembly code to file? (Y/N)
-    + Auto set carry flag? (Y/N)
-    + Highlight changed bits? (Y/N)
- 
- - Logical instructions:
-    + Add new opertion: AND
-    + Add new operation: ORA
+ - Save assembly log to file as "calc.asm"
 
- - Add transfer operations (Txx)
+ - Settings: Save settings to file?
 
  - Add support for commands by pressing ":" followed by opcode (e.g. :STA 01000000)
     + INC
@@ -77,17 +36,12 @@
     + T<FIRST REGISTER><SECOND REGISTER> (e.g. TAB -> TRANSFER A TO B)
 
  - UI overhaul
-
- - Make seperate class for handling user input (GetInputCLI)
-   + A generic class for handling input in CLI applications, reusable for other projects
-
- - Make seperate RenderCLI class
-    + A generic class for rendering CLI applications, reusable for other projects
-    + Transfer existing render code to that class
  
- - Make a CLIApplication class
-   + A generic class for CLI applications
-   + Move RenderCLI and GetInputCLI to the new class
+ - Check that all assembly logging is correct
+
+ - Check that all flags behave correctly
+
+ - Check that all opcodes behave correctly
 
  ? Add debug mode
 

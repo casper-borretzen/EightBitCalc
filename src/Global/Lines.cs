@@ -6,8 +6,8 @@ public static class Lines
     // Make seperator and blank line
     public static void Init(int width)
     {
-        blank        = "".PadLeft(width,' ');
-        seperator[0] = "".PadLeft(width,'-');
-        seperator[1] = "".PadLeft(width,'*');
+        blank        = new String(' ', width);
+        seperator[0] = new String('-', width);
+        seperator[1] = new String('/', width);
     }
 }
