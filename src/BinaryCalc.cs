@@ -42,11 +42,11 @@
     private int windowHeight = 0;
     
     // Settings
-    private Dictionary<string, bool> settings = new Dictionary<string, bool>
+    private Dictionary<string, Setting> settings = new Dictionary<string, Setting>
     {
-        { "uiHlChangedBit", true },
-        { "flagAutoCarry",  true },
-        { "loggerAsmFile",  true }
+        { "uiHlChangedBit", new Setting(true, "HIGHLIGHT BITS CHANGED IN PREVIOUS OPERATION") },
+        { "flagAutoCarry",  new Setting(true, "(NOT IMPLEMENTED!) AUTO CARRY") },
+        { "loggerAsmFile",  new Setting(true, "(NOT IMPLEMENTED!) SAVE ASM FILE") }
     }; 
 
     // Dictionaries for container content
@@ -57,7 +57,7 @@
     Dictionary<STATE, ContainerScroll> containerScroll = new Dictionary<STATE, ContainerScroll>
     {
         { STATE.HELP,     new ContainerScroll(RENDER_HEIGHT - 7) },
-        { STATE.ASSEMBLY, new ContainerScroll(RENDER_HEIGHT - 7, startAtBottom: true) }
+        { STATE.ASSEMBLY, new ContainerScroll(RENDER_HEIGHT - 7, startAtBottom: true, showLineNum: true) }
     };
 
     // Create toggle containers
@@ -738,7 +738,7 @@
                 bool bitChanged = (registers[registerIndex] & bitToCheck) != (registersPrev[registerIndex] & bitToCheck);
                 
                 // Set the value of the current "pixel"
-                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? (bitChanged && settings["uiHlChangedBit"]) ? COLORS.FG_BRIGHT_YELLOW + FILLED + COLORS.DEFAULT : FILLED : EMPTY;
+                display[y] += DIGITS[currentDigit,y,x % CHAR_WIDTH] ? (bitChanged && settings["uiHlChangedBit"].enabled) ? COLORS.FG_BRIGHT_YELLOW + FILLED + COLORS.DEFAULT : FILLED : EMPTY;
             }
 
             // Render the results of the current row

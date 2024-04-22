@@ -2,7 +2,7 @@
 public class ContainerToggle : Container
 {
     private int selPos = 0;
-    private Dictionary<string, bool> content = new Dictionary<string, bool>();
+    private Dictionary<string, Setting> content = new Dictionary<string, Setting>();
 
     // Zero the scroll num and selected index
     public override void Zero()
@@ -37,7 +37,7 @@ public class ContainerToggle : Container
     }
 
     // Link the content of the container with a list
-    public void LinkContent(Dictionary<string, bool> content)
+    public void LinkContent(Dictionary<string, Setting> content)
     {
         this.content = content;
         base.contentSize = content.Count;
@@ -47,7 +47,7 @@ public class ContainerToggle : Container
     // Toggle the bool value for the currently selected item
     public bool Toggle()
     {
-        content[content.ElementAt(selPos).Key] = !content.ElementAt(selPos).Value;
+        content.ElementAt(selPos).Value.Toggle();
         return true;
     }
     
@@ -58,7 +58,7 @@ public class ContainerToggle : Container
         {
             if (i < base.contentSize)
             {
-                Console.WriteLine(" " + (i == selPos ? "<" : " ") + " [" + (content.ElementAt(i).Value == true ? "X" : "-") + "] " + (i == selPos ? ">" : " ") + " " + content.ElementAt(i).Key);
+                Console.WriteLine(" " + (i == selPos ? "<" : " ") + " [" + (content.ElementAt(i).Value.enabled == true ? "X" : "-") + "] " + (i == selPos ? ">" : " ") + " " + content.ElementAt(i).Value.description);
             }
 
             // Empty lines

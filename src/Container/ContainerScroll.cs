@@ -51,7 +51,7 @@ public class ContainerScroll : Container
                 if (showLineNum)
                 {
                     int lineNumDigits = (base.contentSize).ToString().Length;
-                    line = " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + line;
+                    line = " " + COLORS.BG_BRIGHT_BLACK + COLORS.FG_DARK_WHITE + " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + COLORS.DEFAULT + " " + line;
                 }
 
                 // Render content
