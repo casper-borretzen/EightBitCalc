@@ -51,6 +51,12 @@ public class ContainerToggle : Container
         return true;
     }
     
+    // Render the container header
+    protected override void RenderHeader(){
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + (" " + base.title + " " + COLORS.DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(Lines.seperator[0]);
+    }
+    
     // Render the content the container
     protected override void RenderContent()
     {
@@ -68,8 +74,9 @@ public class ContainerToggle : Container
     
     // Constructor
     public ContainerToggle(
+            string title,
             int size, 
-            bool startAtBottom = false) : base(size, startAtBottom)
+            bool startAtBottom = false) : base(title, size, startAtBottom)
     {
     }
 }

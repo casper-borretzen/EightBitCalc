@@ -20,17 +20,14 @@
     private bool[,,] DIGITS = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
     private const string MAIN_TITLE = "8-BIT BINARY CALCULATOR";
     private const int RENDER_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
-    private const int RENDER_HEIGHT = 43;
-    private const int REGISTER_NUM = 8;
+    private const int RENDER_HEIGHT = 44;
+    private const int REGISTER_NUM = 3;
 
     // Set global variables
     private bool running = true;
     private STATE appState = STATE.MAIN;
     private STATE appStatePrev = STATE.MAIN;
-    private List<string> messageLog = new List<string>();
     private string[] display = new string[CHAR_HEIGHT];
-    private string[] seperatorLine = new string[2];
-    private string blankLine = "";
     private byte[] registers = new byte[REGISTER_NUM];
     private byte[] registersPrev = new byte[REGISTER_NUM];
     private byte registerIndex = 0;
@@ -40,30 +37,33 @@
     private bool overflowFlag = false;
     private int windowWidth = 0;
     private int windowHeight = 0;
-    
+
+    // Declare logger
+    public List<string> messages = new List<string>();
+    public List<string> assembly = new List<string>();
+
     // Settings
     private Dictionary<string, Setting> settings = new Dictionary<string, Setting>
     {
-        { "uiHlChangedBit", new Setting(true, "HIGHLIGHT BITS CHANGED IN PREVIOUS OPERATION") },
-        { "flagAutoCarry",  new Setting(true, "(NOT IMPLEMENTED!) AUTO CARRY") },
-        { "loggerAsmFile",  new Setting(true, "(NOT IMPLEMENTED!) SAVE ASM FILE") }
+        { "uiHlChangedBit", new Setting(true,  "HIGHLIGHT BITS CHANGED IN PREVIOUS OPERATION") },
+        { "flagsAutoCarry", new Setting(false, "AUTOMATICALLY SET/UNSET CARRY FLAG") },
+        { "loggerAsmFile",  new Setting(true,  "(NOT IMPLEMENTED!) SAVE ASM FILE") }
     }; 
 
-    // Dictionaries for container content
+    // Dictionary for HELP content
     List <string> help = new List<string>();
-    List <string> assembly = new List<string>();
     
     // Create scroll containers
     Dictionary<STATE, ContainerScroll> containerScroll = new Dictionary<STATE, ContainerScroll>
     {
-        { STATE.HELP,     new ContainerScroll(RENDER_HEIGHT - 7) },
-        { STATE.ASSEMBLY, new ContainerScroll(RENDER_HEIGHT - 7, startAtBottom: true, showLineNum: true) }
+        { STATE.HELP,     new ContainerScroll("HELP SCREEN",  RENDER_HEIGHT - 7) },
+        { STATE.ASSEMBLY, new ContainerScroll("ASSEMBLY LOG", RENDER_HEIGHT - 7, startAtBottom: true, showLineNum: true) }
     };
 
     // Create toggle containers
     Dictionary<STATE, ContainerToggle> containerToggle = new Dictionary<STATE, ContainerToggle>
     {
-        { STATE.SETTINGS, new ContainerToggle(RENDER_HEIGHT - 7) }
+        { STATE.SETTINGS, new ContainerToggle("SETTINGS", RENDER_HEIGHT - 7) }
     };
 
     // Set error types
@@ -106,6 +106,27 @@
         }
     }
 
+    // Add message to the message log
+    public void AddMessage(string line)
+    {
+        messages.Add(DateTime.Now.ToString("HH:mm:ss") + " " + line.ToUpper());
+    }
+
+    // Add assembly code to the assembly log
+    public void AddAssembly(string line)
+    {
+        containerScroll[STATE.ASSEMBLY].AddContent(line);
+    }
+
+    // Render message log
+    public void RenderMessages(int num = 8)
+    {
+        for (int i = num; i >= 0; i--)
+        {
+            Console.WriteLine(messages.Count > i ? " " + messages[messages.Count-(i+1)] : " -");
+        }
+    }
+
     // Convert a byte to an eight digit string string
     private string ByteToString(byte bits)
     {
@@ -115,33 +136,15 @@
     // Get the letter for a given register
     private char GetRegisterChar(byte index)
     {
-        return (char)((int)'A' + index);
-    }
-    
-    // Add a message to the message log
-    private void MessageAdd(string message)
-    {
-        messageLog.Add(DateTime.Now.ToString("HH:mm:ss") + " " + message.ToUpper());
-    }
-    
-    // Add assembly code to the assembly log
-    private void AssemblyAdd(string line)
-    {
-        containerScroll[STATE.ASSEMBLY].AddContent(line);
+        //return (char)((int)'A' + index);
+        return (char)((int)'A' + (index == 0 ? 0 : index + 22));
     }
 
     // Initialize values
     private void Init() 
     {
-        MessageAdd("Welcome!");
-
-        // Make seperator and blank line
-        for (int i = 0; i < RENDER_WIDTH; i++)
-        {
-            blankLine += ' ';
-            seperatorLine[0] += '-';
-            seperatorLine[1] += '*';
-        }
+        // Generate blank line and seperator lines
+        Lines.Init(RENDER_WIDTH);
 
         // Zero digit
         DIGITS[0,1,0] = true;
@@ -197,7 +200,7 @@
             "    1     0     0     0     0     0     0     1  = -128",
             "    1     1     1     1     1     1     1     1  = -1",
             "",
-            seperatorLine[1],
+            Lines.seperator[1],
             "",
             " " + COLORS.UL + "ADC: ADD WITH CARRY" + COLORS.DEFAULT + "                          (N,V,Z,C)",
             " ADDS THE VALUE OF A CHOSEN REGISTER [A] - [H]",
@@ -260,7 +263,7 @@
             " ORA CAN BE USED TO SET A PARTICULAR BIT TO TRUE.",
             " ORA + EOR CAN BE USED TO SET A PARTICULAR BIT TO FALSE.",
             "",
-            seperatorLine[1],
+            Lines.seperator[1],
             "",
             " FLAGS ARE SET AFTER PERFORMING OPERATIONS.",
             " FLAGS ARE INDICATED BY PARANTHESIS.",
@@ -271,13 +274,13 @@
             " (O) OVERFLOW FLAG",
             " (N) NEGATIVE FLAG: IS SET TO 1 IF BIT 7 IS 1",
             "",
-            seperatorLine[1],
+            Lines.seperator[1],
             "",
             " A REGISTER HOLDS ONE BYTE OF DATA.",
             " REGISTERS ARE INDICATED BY SQUARE BRACKETS.",
             " EIGHT REGISTERS [A] TO [H] ARE IMPLEMENTED.",
             "",
-            seperatorLine[1],
+            Lines.seperator[1],
             "",
             " KEYBINDINGS AND MODIFIERS:",
             " <KEY>",
@@ -285,22 +288,17 @@
             "",
         };
 
-        //containers[STATE.SETTINGS].SetContent(new List <string>
-        //{
-        //    "Highlight changed bit",
-        //    "(not implemented) Automatically set/clear carry",
-        //    "(not implemented) Save assembly log to file"
-        //});
-        
+        // Link lists with containers
         containerScroll[STATE.HELP].LinkContent(help);
         containerScroll[STATE.ASSEMBLY].LinkContent(assembly);
         containerToggle[STATE.SETTINGS].LinkContent(settings);
+
+        AddMessage("Welcome!");
     }
 
     // Unset all flags
     private void UnsetFlags()
     {
-        carryFlag = false;
         zeroFlag = false;
         negativeFlag = false;
         overflowFlag = false;
@@ -332,8 +330,8 @@
         registers[registerIndex] = (byte)(registers[registerIndex] ^ bits);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "EOR: Exclusive OR         <- " + ByteToString(bits)); }
-        AssemblyAdd("EOR #%" + ByteToString(bits));
+        if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "EOR: Exclusive OR         <- " + ByteToString(bits)); }
+        AddAssembly("EOR #%" + ByteToString(bits));
     }
 
     // Arithmetic shift left operation
@@ -345,8 +343,8 @@
         registers[registerIndex] = (byte)(registers[registerIndex] << 1);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ASL: Arithmetic shift left"); }
-        AssemblyAdd("ASL");
+        if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "ASL: Arithmetic shift left"); }
+        AddAssembly("ASL");
     }
 
     // Logical shift right operation
@@ -358,8 +356,8 @@
         registers[registerIndex] = (byte)(registers[registerIndex] >> 1);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "LSR: Logical shift right"); }
-        AssemblyAdd("LSR");
+        if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "LSR: Logical shift right"); }
+        AddAssembly("LSR");
     }
 
     // Rotate left operation
@@ -372,8 +370,8 @@
         if (carryFlag) { registers[registerIndex] += 0b00000001; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ROL: Rotate left"); }
-        AssemblyAdd("ROL");
+        if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "ROL: Rotate left"); }
+        AddAssembly("ROL");
     }
     
     // Rotate right operation
@@ -386,83 +384,157 @@
         if (carryFlag) { registers[registerIndex] += 0b10000000; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ROR: Rotate right"); }
-        AssemblyAdd("ROR");
+        if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "ROR: Rotate right"); }
+        AddAssembly("ROR");
     }
 
-    // Decrement operation
-    private void DEC(bool silent = false)
+    // Decrement X operation
+    private void DEX(bool silent = false)
     {
-        registersPrev[registerIndex] = registers[registerIndex];
+        registersPrev[1] = registers[1];
         UnsetFlags();
-        //if ((registers[registerIndex] & 0b00000001) == 0b00000001) {carryFlag = true;}
-        registers[registerIndex] -= (byte)0b00000001;
+        registers[1] -= (byte)0b00000001;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "DEC: Decrement"); }
-        AssemblyAdd("DEC");
+        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "DEX: Decrement X"); }
+        AddAssembly("DEX");
+    }
+    
+    // Decrement Y operation
+    private void DEY(bool silent = false)
+    {
+        registersPrev[2] = registers[2];
+        UnsetFlags();
+        registers[2] -= (byte)0b00000001;
+        SetZeroFlag();
+        SetNegativeFlag();
+        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "DEY: Decrement Y"); }
+        AddAssembly("DEY");
+    }
+    
+    // Increment X operation
+    private void INX(bool silent = false)
+    {
+        registersPrev[1] = registers[1];
+        UnsetFlags();
+        registers[1] += (byte)0b00000001;
+        SetZeroFlag();
+        SetNegativeFlag();
+        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "INX: Increment X"); }
+        AddAssembly("INX");
     }
     
     // Increment operation
-    private void INC(bool silent = false)
+    private void INY(bool silent = false)
     {
-        registersPrev[registerIndex] = registers[registerIndex];
+        registersPrev[2] = registers[2];
         UnsetFlags();
-        //if (registers[registerIndex] == 0b11111111) { carryFlag = true; }
-        registers[registerIndex] += (byte)0b00000001;
+        registers[2] += (byte)0b00000001;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "INC: Increment"); }
-        AssemblyAdd("INC");
+        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "INY: Increment Y"); }
+        AddAssembly("INY");
     }
 
     // Add with carry operation
-    private void ADC(byte bits, bool silent = false)
+    private void ADC(byte bits, bool silent = false, bool inc = false)
     {
-        registersPrev[registerIndex] = registers[registerIndex];
+        registersPrev[0] = registers[0];
         UnsetFlags();
-        if (((registers[registerIndex] & 0b10000000) == 0b10000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b00000000)) { carryFlag = true; }
-        if (((registers[registerIndex] & 0b10000000) == 0b00000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
-        registers[registerIndex] += bits;
+        if (settings["flagsAutoCarry"].enabled && carryFlag) { CLC(); }
+        if (carryFlag && inc) { bits = 0b00000000; }
+        byte bitsWithCarry = (byte)(bits + (byte)(carryFlag ? 0b00000001 : 0b00000000));
+        registers[0] += bitsWithCarry;
+        if (((registers[0] & 0b10000000) == 0b10000000) && (((registers[0] + bits) & 0b10000000) == 0b00000000)) { carryFlag = true; }
+        if (((registers[0] & 0b10000000) == 0b00000000) && (((registers[0] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ADC: Add with carry       <- " + ByteToString(bits) ); }
-        AssemblyAdd("ADC #%" + ByteToString(bits));
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ADC: Add with carry       <- " + ByteToString(bitsWithCarry) ); }
+        AddAssembly("ADC #%" + ByteToString(bits));
     }
     
-    // Subtract with carry operation
-    private void SBC(byte bits, bool silent = false)
+    private void CLC(bool silent = false)
     {
-        registersPrev[registerIndex] = registers[registerIndex];
+        carryFlag = false;
+        if (!silent) { AddMessage("CLC: CLEAR CARRY FLAG"); }
+        AddAssembly("CLC");
+    }
+    
+    private void SEC(bool silent = false)
+    {
+        carryFlag = true;
+        if (!silent) { AddMessage("SEC: SET CARRY FLAG"); }
+        AddAssembly("SEC");
+    }
+
+    // Subtract with carry operation
+    private void SBC(byte bits, bool silent = false, bool dec = false)
+    {
+        registersPrev[0] = registers[0];
         UnsetFlags();
-        if (((registers[registerIndex] & 0b00000001) == 0b00000001) && (((registers[registerIndex] + bits) & 0b00000001) == 0b00000000)) { carryFlag = true; }
-        if (((registers[registerIndex] & 0b10000000) == 0b00000000) && (((registers[registerIndex] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
-        registers[registerIndex] -= bits;
+        if (settings["flagsAutoCarry"].enabled && !carryFlag) { SEC(); }
+        if (!carryFlag && dec) { bits = 0b00000000; }
+        byte bitsWithCarry = (byte)(bits + (byte)(carryFlag ? 0b00000000 : 0b00000001));
+        registers[0] -= bitsWithCarry;
+        //if (registers[0] < (byte)(registers[0] - bits)) { carryFlag = false; }
+        if (((registers[0] & 0b10000000) == 0b00000000) && (((registers[0] - bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "SBC: Subtract with carry  <- " + ByteToString(bits) ); }
-        AssemblyAdd("SBC #%" + ByteToString(bits));
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "SBC: Subtract with carry  <- " + ByteToString(bitsWithCarry) ); }
+        AddAssembly("SBC #%" + ByteToString(bits));
+    }
+
+    private void Increment()
+    {
+        switch (registerIndex)
+        {
+            case 0:
+                ADC((byte)(0b00000001), inc: true);
+                break;
+            case 1:
+                INX();
+                break;
+            case 2:
+                INY();
+                break;
+        }
+    }
+    
+    private void Decrement()
+    {
+        switch (registerIndex)
+        {
+            case 0:
+                SBC((byte)(0b00000001), dec: true);
+                break;
+            case 1:
+                DEX();
+                break;
+            case 2:
+                DEY();
+                break;
+        }
     }
 
     // Add value of the selected registry to the current registry
-    private void AddRegistry(byte targetRegister, bool silent = false)
+    private void AddRegister(byte targetRegister, bool silent = false)
     {
         if (registerIndex != targetRegister)
         {
             byte bits = registers[targetRegister];
             ADC(bits, true);
-            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "ADC: Add with carry       <- [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
+            if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "ADC: Add with carry       <- [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
         }
     }
 
     // Subtract value of the current registry with the selected registry
-    private void SubtractRegistry(byte targetRegister, bool silent = false)
+    private void SubtractRegister(byte targetRegister, bool silent = false)
     {
         if (registerIndex != targetRegister)
         {
             byte bits = registers[targetRegister];
             SBC(bits, true);
-            if (!silent) { MessageAdd("[" + GetRegisterChar(registerIndex) + "] " + "SBC: Subtract with carry  <- [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
+            if (!silent) { AddMessage("[" + GetRegisterChar(registerIndex) + "] " + "SBC: Subtract with carry  <- [" + GetRegisterChar(targetRegister) + "] " + ByteToString(bits) ); }
         }
     }
 
@@ -473,80 +545,53 @@
         switch (key.Key)
         {
             case ConsoleKey.A:
-                if (modOne) { AddRegistry(0b00000000); }
-                else if (modTwo) { SubtractRegistry(0b00000000); }
-                else { ChangeRegister(0b00000000); }
-                return true;
-            case ConsoleKey.B:
-                if (modOne) { AddRegistry(0b00000001); }
-                else if (modTwo) { SubtractRegistry(0b00000001); }
-                else { ChangeRegister(0b00000001); }
-                return true;
-            case ConsoleKey.C:
-                if (modOne) { AddRegistry(0b00000010); }
-                else if (modTwo) { SubtractRegistry(0b00000010); }
-                else { ChangeRegister(0b00000010); }
-                return true;
-            case ConsoleKey.D:
-                if (modOne) { AddRegistry(0b00000011); }
-                else if (modTwo) { SubtractRegistry(0b00000011); }
-                else { ChangeRegister(0b00000011); }
-                return true;
-            case ConsoleKey.E:
-                if (modOne) { AddRegistry(0b00000100); }
-                else if (modTwo) { SubtractRegistry(0b00000100); }
-                else { ChangeRegister(0b00000100); }
-                return true;
-            case ConsoleKey.F:
-                if (modOne) { AddRegistry(0b00000101); }
-                else if (modTwo) { SubtractRegistry(0b00000101); }
-                else { ChangeRegister(0b00000101); }
-                return true;
-            case ConsoleKey.G:
-                if (modOne) { AddRegistry(0b00000110); }
-                else if (modTwo) { SubtractRegistry(0b00000110); }
-                else { ChangeRegister(0b00000110); }
-                return true;
-            case ConsoleKey.H:
-                if (modOne) { AddRegistry(0b00000111); }
-                else if (modTwo) { SubtractRegistry(0b00000111); }
-                else { ChangeRegister(0b00000111); }
-                return true;
+                if (!modOne && !modTwo) { ChangeRegister(0); return true; }
+                return false;
+            case ConsoleKey.X:
+                if (registerIndex == 0 && modOne) { AddRegister(0b00000001); return true;}
+                else if (registerIndex == 0 && modTwo) { SubtractRegister(1); return true; }
+                else if (!modOne && !modTwo) { ChangeRegister(1); return true; }
+                return false;
+            case ConsoleKey.Y:
+                if (registerIndex == 0 && modOne) { AddRegister(2); return true;}
+                else if (registerIndex == 0 && modTwo) { SubtractRegister(2); return true; }
+                else if (!modOne && !modTwo) { ChangeRegister(2); return true; }
+                return false;
             case ConsoleKey.D0:
-                EOR(0b00000001);
-                return true;
+                if (registerIndex == 0) { EOR(0b00000001); return true; }
+                return false;
             case ConsoleKey.D1:
-                EOR(0b00000010);
-                return true;
+                if (registerIndex == 0) { EOR(0b00000010); return true; }
+                return false;
             case ConsoleKey.D2:
-                EOR(0b00000100);
-                return true;
+                if (registerIndex == 0) { EOR(0b00000100); return true; }
+                return false;
             case ConsoleKey.D3:
-                EOR(0b00001000);
-                return true;
+                if (registerIndex == 0) { EOR(0b00001000); return true; }
+                return false;
             case ConsoleKey.D4:
-                EOR(0b00010000);
-                return true;
+                if (registerIndex == 0) { EOR(0b00010000); return true; }
+                return false;
             case ConsoleKey.D5:
-                EOR(0b00100000);
-                return true;
+                if (registerIndex == 0) { EOR(0b00100000); return true; }
+                return false;
             case ConsoleKey.D6:
-                EOR(0b01000000);
-                return true;
+                if (registerIndex == 0) { EOR(0b01000000); return true; }
+                return false;
             case ConsoleKey.D7:
-                EOR(0b10000000);
-                return true;
+                if (registerIndex == 0) { EOR(0b10000000); return true; }
+                return false;
             case ConsoleKey.LeftArrow:
-                if (modOne) { ROL(); } else { ASL(); }
-                return true;
+                if (registerIndex == 0) { if (modOne) { ROL(); } else { ASL(); } return true; }
+                return false;
             case ConsoleKey.RightArrow:
-                if (modOne) { ROR(); } else { LSR(); }
-                return true;
+                if (registerIndex == 0) {if (modOne) { ROR(); } else { LSR(); } return true; }
+                return false;
             case ConsoleKey.UpArrow:
-                INC();
+                Increment();
                 return true;
             case ConsoleKey.DownArrow:
-                DEC();
+                Decrement();
                 return true;
             case ConsoleKey.M:
                 ChangeState(STATE.ASSEMBLY);
@@ -715,7 +760,7 @@
         }
         Console.WriteLine(registerLine);
         Console.WriteLine(registerLineHex);
-        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(Lines.seperator[0]);
 
         // Iterate through the x and y coords of the "pixels" and display the digits from the selected register
         for (int y = 0; y < CHAR_HEIGHT; y++)
@@ -746,11 +791,11 @@
         }
 
         // Decimal values
-        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(Lines.seperator[0]);
         Console.WriteLine(" UNSIGNED VALUE:     " + (registers[registerIndex].ToString()).PadLeft(3,' ') + "        SIGNED VALUE:      " + (((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString()).PadLeft(4,' '));
         //Console.WriteLine(" ASCII CHARACTER:  " + (registers[registerIndex] > 32 ? (char)registers[registerIndex] : "-"));
 
-        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(Lines.seperator[0]);
         
         // Flags
         string carryFlagString = " (C) CARRY FLAG:       " + COLORS.FG_BLACK + (carryFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
@@ -760,35 +805,28 @@
         Console.WriteLine(carryFlagString + zeroFlagString);
         Console.WriteLine(negativeFlagString + overFlowFlagString);
         
-        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(Lines.seperator[0]);
+       
+        // Render message log
+        RenderMessages();
         
-        // Message log
-        Console.WriteLine(messageLog.Count > 7 ? " " + messageLog[messageLog.Count-8] : " -");
-        Console.WriteLine(messageLog.Count > 6 ? " " + messageLog[messageLog.Count-7] : " -");
-        Console.WriteLine(messageLog.Count > 5 ? " " + messageLog[messageLog.Count-6] : " -");
-        Console.WriteLine(messageLog.Count > 4 ? " " + messageLog[messageLog.Count-5] : " -");
-        Console.WriteLine(messageLog.Count > 3 ? " " + messageLog[messageLog.Count-4] : " -");
-        Console.WriteLine(messageLog.Count > 2 ? " " + messageLog[messageLog.Count-3] : " -");
-        Console.WriteLine(messageLog.Count > 1 ? " " + messageLog[messageLog.Count-2] : " -");
-        Console.WriteLine(messageLog.Count > 0 ? " " + messageLog.Last() : " -");
-        
-        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(Lines.seperator[0]);
         
         // Keyboard shortcuts
         Console.WriteLine(" <UP>              INCREMENT                  (N,Z)");
         Console.WriteLine(" <DOWN>            DECREMENT                  (N,Z)");
-        Console.WriteLine(" <LEFT>            ARITHMETIC SHIFT LEFT      (N,Z,C)");
+        Console.WriteLine((registerIndex == 0 ? "" : COLORS.FG_BRIGHT_BLACK ) + " <LEFT>            ARITHMETIC SHIFT LEFT      (N,Z,C)");
         Console.WriteLine(" <RIGHT>           LOGICAL SHIFT RIGHT        (N,Z,C)");
-        Console.WriteLine(" <S+LEFT>          ROTATE LEFT                (N,Z,C)");
-        Console.WriteLine(" <S+RIGHT>         ROTATE RIGHT               (N,Z,C)");
+        Console.WriteLine(" <$1+LEFT>         ROTATE LEFT                (N,Z,C)");
+        Console.WriteLine(" <$1+RIGHT>        ROTATE RIGHT               (N,Z,C)");
         Console.WriteLine(" <0> - <7>         EXCLUSIVE OR               (N,Z)");
-        Console.WriteLine(" <S+A> - <S+H>     ADD WITH CARRY             (N,V,Z,C)");
-        Console.WriteLine(" <A+A] - <A+H>     SUBTRACT WITH CARRY        (N,V,Z,C)");
-        Console.WriteLine(" <A> - <H>         CHANGE ACTIVE REGISTER");
+        Console.WriteLine(" <$1+A> - <$1+H>   ADD WITH CARRY             (N,V,Z,C)");
+        Console.WriteLine(" <$2+A> - <$2+H>   SUBTRACT WITH CARRY        (N,V,Z,C)");
+        Console.WriteLine((registerIndex == 0 ? "" : COLORS.DEFAULT ) + " <A> <X> <Y>       CHANGE ACTIVE REGISTER");
         Console.WriteLine(" <M>               ASSEMBLY LOG");
-        Console.WriteLine(" <?>               HELP");
         Console.WriteLine(" <S>               SETTINGS");
-        Console.WriteLine(seperatorLine[0]);
+        Console.WriteLine(" <?>               HELP");
+        Console.WriteLine(Lines.seperator[0]);
         Console.WriteLine(" PRESS <ESC> TO QUIT PROGRAM");
     }
 
@@ -798,15 +836,9 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " HELP SCREEN " + COLORS.DEFAULT + "      <UP> SCROLL UP / <DOWN> SCROLL DOWN");
-        Console.WriteLine(seperatorLine[0]);
 
         // Render the HELP container
         containerScroll[STATE.HELP].Render();
-
-        // Show keybinds
-        Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containerScroll[STATE.HELP].GetScrollPos().PadLeft(17));
     }
     
     // Render the SETTINGS screen
@@ -815,15 +847,9 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " SETTINGS " + COLORS.DEFAULT + "   <UP> SELECTION UP / <DOWN> SELECTION DOWN");
-        Console.WriteLine(seperatorLine[0]);
-
+        
         // Render the SETTINGS container
         containerToggle[STATE.SETTINGS].Render();
-
-        // Show keybinds
-        Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN");
     }
 
     // Render the ASSEMBLY screen
@@ -832,15 +858,9 @@
         // Main title
         RenderTitlebar();
         Console.WriteLine();
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " ASSEMBLY LOG " + COLORS.DEFAULT + "     <UP> SCROLL UP / <DOWN> SCROLL DOWN");
-        Console.WriteLine(seperatorLine[0]);
 
         // Render the ASSEMBLY container
         containerScroll[STATE.ASSEMBLY].Render();
-
-        // Show keybinds
-        Console.WriteLine(seperatorLine[0]);
-        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + containerScroll[STATE.ASSEMBLY].GetScrollPos().PadLeft(17));
     }
 
     // Render the ERROR screen
@@ -868,7 +888,7 @@
         // Clear the console
         Console.SetCursorPosition(0,0);
         for (int i = 0; i < RENDER_HEIGHT; i++){
-            Console.WriteLine(blankLine);
+            Console.WriteLine(Lines.blank);
         }
         Console.SetCursorPosition(0,0);
       
@@ -894,7 +914,7 @@
     }
     
     // Main loop
-    private void Run()
+    public void Run()
     {
         // Clear console and hide cursor
         Console.CursorVisible = false;
@@ -917,7 +937,6 @@
     public BinaryCalc()
     {
         Init();
-        Run();
     }
 }
 

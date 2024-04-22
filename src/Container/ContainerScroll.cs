@@ -38,6 +38,12 @@ public class ContainerScroll : Container
         base.SetScrollMax();
     }
 
+    // Render the container header
+    protected override void RenderHeader(){
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + (" " + base.title + " " + COLORS.DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(Lines.seperator[0]);
+    }
+
     // Render the content of a SCROLL type container
     protected override void RenderContent()
     {
@@ -65,9 +71,10 @@ public class ContainerScroll : Container
     
     // Constructor
     public ContainerScroll(
+            string title,
             int size,
             bool startAtBottom = false,
-            bool showLineNum = false) : base(size, startAtBottom)
+            bool showLineNum = false) : base(title, size, startAtBottom)
     {
         this.showLineNum = showLineNum;
     }

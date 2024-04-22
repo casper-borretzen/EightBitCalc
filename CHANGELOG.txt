@@ -1,3 +1,11 @@
+v6
+ - Container class has been split into ContainerScroll and ContainerToggle
+   that inherits from the Container base class
+ - Made COLORS global variables
+ - Added colors to line number in the ContainerScroll class
+ - Added title, header and footer built into the Container class
+ - Added Logger class for logging messages and ASSEMBLY lines
+ 
 v5
  - Container class:
    + Added display of scroll index/max for containers

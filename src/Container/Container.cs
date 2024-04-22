@@ -1,5 +1,6 @@
 // A scrollable container to hold lines to be rendered on screen
 public abstract class Container {
+    protected string title = "";
     protected int scrollPos = 0;
     protected int scrollMax = 0;
     protected int size = 0;
@@ -15,6 +16,9 @@ public abstract class Container {
     // Move scroll/selection down
     public abstract bool Down();
     
+    // Render the container header
+    protected abstract void RenderHeader();
+
     // Render lines of content
     protected abstract void RenderContent();
 
@@ -79,16 +83,27 @@ public abstract class Container {
     public void Render()
     {
         // Check if there is content and show empty screen if content is empty
+        RenderHeader();
         if (contentSize == 0) { RenderEmpty(); }
         else{ RenderContent(); }
+        RenderFooter();
+    }
+
+    // Render the container footer
+    private void RenderFooter()
+    {
+        Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + GetScrollPos().PadLeft(17));
     }
 
     // Constructor
     public Container(
-            int size, 
+            string title,
+            int size,
             bool startAtBottom)
     {
         this.size = size;
+        this.title = title;
         this.startAtBottom = startAtBottom;
     }
 }
