@@ -14,7 +14,10 @@
     {
         DEFAULT,
         ADD,
-        SUBTRACT
+        SUBTRACT,
+        TRANSFER,
+        STORE,
+        LOAD
     };
 
     private enum ByteType 
@@ -35,7 +38,7 @@
     private bool[,,] DIGITS = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
     private const string MAIN_TITLE = "8-BIT BINARY CALCULATOR";
     private const int RENDER_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
-    private const int RENDER_HEIGHT = 48;
+    private const int RENDER_HEIGHT = 50;
     private const int REGISTER_NUM = 3;
     private const int MEMORY_NUM = 8;
 
@@ -81,7 +84,7 @@
     // Create toggle containers
     Dictionary<STATE, ContainerToggle> containerToggle = new Dictionary<STATE, ContainerToggle>
     {
-        { STATE.SETTINGS, new ContainerToggle("SETTINGS", RENDER_HEIGHT - 7) }
+        { STATE.SETTINGS, new ContainerToggle("PREFERENCES", RENDER_HEIGHT - 7) }
     };
 
     // Set error types
@@ -376,64 +379,93 @@
         AddAssembly("CLV");
     }
 
-    // Logical AND operation
-    private void AND(byte bits, bool silent = false)
+    // Format value reference mode
+    private void FormatByteType(byte bits, ByteType type, out byte newBits, out string asm)
     {
+        asm = "";
+        newBits = bits;
+        if (type == ByteType.Binary) { asm = "#%" + ByteToString(bits); }
+        else if (type == ByteType.Decimal) { asm = "#" + bits.ToString(); }
+        else if (type == ByteType.Hex) {asm = "#$" + HexToString(bits);}
+        else if (type == ByteType.Address) {asm = "$" + HexToString(bits); newBits = memory[bits];}
+    }
+
+    // Logical AND operation
+    private void AND(byte bits, ByteType type = ByteType.Binary, bool silent = false)
+    {
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
         registers[0] = (byte)(registers[0] & bits);
         SetZeroFlag();
         SetNegativeFlag();
         if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "AND: Logical AND              <- " + ByteToString(bits)); }
-        AddAssembly("AND #%" + ByteToString(bits)); 
+        AddAssembly("AND " + asm); 
     } 
 
     // Logical inclusive OR operation
-    private void ORA(byte bits, bool silent = false)
+    private void ORA(byte bits, ByteType type = ByteType.Binary, bool silent = false)
     {
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
         registers[0] = (byte)(registers[0] | bits);
         SetZeroFlag();
         SetNegativeFlag();
         if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ORA: Logical Inclusive OR     <- " + ByteToString(bits)); }
-        AddAssembly("AND #%" + ByteToString(bits)); 
+        AddAssembly("ORA " + asm); 
+    }
+
+    // Exclusive OR operation
+    private void EOR(byte bits, ByteType type = ByteType.Binary, bool silent = false)
+    {
+        FormatByteType(bits, type, out bits, out string asm);
+        registersPrev[0] = registers[0];
+        UnsetFlags();
+        registers[0] = (byte)(registers[0] ^ bits);
+        SetZeroFlag();
+        SetNegativeFlag();
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "EOR: Exclusive OR             <- " + ByteToString(bits)); }
+        AddAssembly("EOR " + asm);
     }
 
     // Load A operation
-    private void LDA(int position, bool silent = false)
+    private void LDA(byte bits, ByteType type = ByteType.Binary, bool silent = false)
     {
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
-        registers[0] = memory[position];
+        registers[0] = bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "LDA: Load Accumulator         <- " + ByteToString(memory[position])); }
-        AddAssembly("LDA $" + HexToString(position)); 
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "LDA: Load Accumulator         <- " + ByteToString(bits)); }
+        AddAssembly("LDA " + asm); 
     }
 
     // Load X operation
-    private void LDX(byte position, bool silent = false)
+    private void LDX(byte bits, ByteType type = ByteType.Binary, bool silent = false)
     {
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[1] = registers[1];
         UnsetFlags();
-        registers[1] = memory[position];
+        registers[1] = bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "LDX: Load X Register          <- " + ByteToString(memory[position])); }
-        AddAssembly("LDX $" + HexToString(position)); 
+        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "LDX: Load X Register          <- " + ByteToString(bits)); }
+        AddAssembly("LDX " + asm); 
     }
 
     // Load Y operation
-    private void LDY(byte position, bool silent = false)
+    private void LDY(byte bits, ByteType type = ByteType.Binary, bool silent = false)
     {
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[2] = registers[2];
         UnsetFlags();
-        registers[2] = memory[position];
+        registers[2] = bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "LDY: Load Y Register          <- " + ByteToString(memory[position])); }
-        AddAssembly("LDY $" + HexToString(position)); 
+        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "LDY: Load Y Register          <- " + ByteToString(bits)); }
+        AddAssembly("LDY " + asm); 
     }
 
     // Store A operation
@@ -506,18 +538,6 @@
         SetNegativeFlag();
         if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "TYA: Transfer Y to A          <- " + ByteToString(registers[2])); }
         AddAssembly("TYA"); 
-    }
-
-    // Exclusive OR operation
-    private void EOR(byte bits, bool silent = false)
-    {
-        registersPrev[0] = registers[0];
-        UnsetFlags();
-        registers[0] = (byte)(registers[0] ^ bits);
-        SetZeroFlag();
-        SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "EOR: Exclusive OR             <- " + ByteToString(bits)); }
-        AddAssembly("EOR #%" + ByteToString(bits));
     }
 
     // Arithmetic shift left operation
@@ -625,12 +645,7 @@
     // Add with carry operation
     private void ADC(byte bits, ByteType type = ByteType.Binary, bool silent = false, bool inc = false)
     {
-        string asm = "ADC ";
-        if (type == ByteType.Binary) { asm += "#%" + ByteToString(bits); }
-        else if (type == ByteType.Decimal) { asm += "#" + bits.ToString(); }
-        else if (type == ByteType.Hex) {asm += "#$" + HexToString(bits);}
-        else if (type == ByteType.Address) {asm += "$" + HexToString(bits); bits = memory[bits];}
-
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
         if (settings["flagsAutoCarry"].enabled && carryFlag) { CLC(); }
@@ -642,18 +657,13 @@
         SetZeroFlag();
         SetNegativeFlag();
         if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ADC: Add with carry           <- " + ByteToString(bitsWithCarry) ); }
-        AddAssembly(asm);
+        AddAssembly("ADC " + asm);
     }
 
     // Subtract with carry operation
     private void SBC(byte bits, ByteType type = ByteType.Binary, bool silent = false, bool dec = false)
     {
-        string asm = "SBC ";
-        if (type == ByteType.Binary) { asm += "#%" + ByteToString(bits); }
-        else if (type == ByteType.Decimal) { asm += "#" + bits.ToString(); }
-        else if (type == ByteType.Hex) {asm += "#$" + HexToString(bits);}
-        else if (type == ByteType.Address) {asm += "$" + HexToString(bits); bits = memory[bits];}
-        
+        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
         if (settings["flagsAutoCarry"].enabled && !carryFlag) { SEC(); }
@@ -665,7 +675,7 @@
         SetZeroFlag();
         SetNegativeFlag();
         if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "SBC: Subtract with carry      <- " + ByteToString(bitsWithCarry) ); }
-        AddAssembly(asm);
+        AddAssembly("SBC " + asm);
     }
 
     private void Increment()
@@ -700,59 +710,118 @@
         }
     }
 
-    private bool HandleInputNum(byte memoryIndex, bool keyMod)
+    // Store value to memory from register
+    private bool HandleInputStore(byte memoryIndex, bool keyMod)
     {
-        // Load value to register from memory
-        if (keyMod)
-        {
-            if (registerIndex == 0) { LDA(memoryIndex); }
-            else if (registerIndex == 1) { LDX(memoryIndex); }
-            else if (registerIndex == 2) { LDY(memoryIndex); }
-        }
-
-        // Store value to memory from register
-        else
-        {
-            if (registerIndex == 0) { STA(memoryIndex); }
-            else if (registerIndex == 1) { STX(memoryIndex); }
-            else if (registerIndex == 2) { STY(memoryIndex); }
-        }
-        
+        if (registerIndex == 0) { STA(memoryIndex); }
+        else if (registerIndex == 1) { STX(memoryIndex); }
+        else if (registerIndex == 2) { STY(memoryIndex); }
+        return true;
+    }
+    
+    // Load value to register from memory
+    private bool HandleInputLoad(byte memoryIndex, bool keyMod)
+    {
+        if (registerIndex == 0) { LDA(memoryIndex, ByteType.Address); }
+        else if (registerIndex == 1) { LDX(memoryIndex, ByteType.Address); }
+        else if (registerIndex == 2) { LDY(memoryIndex, ByteType.Address); }
         return true;
     }
 
-    private bool HandleInputReg(byte targetRegisterIndex, bool keyMod)
+    private bool HandleInputTransfer(byte targetRegisterIndex, bool keyMod)
     {
         if (targetRegisterIndex != registerIndex)
         {
-            if (keyMod)
+            if (registerIndex == 0) 
             {
-                if (registerIndex == 0) 
-                {
-                    if (targetRegisterIndex == 1) { TAX(); return true; }
-                    else if (targetRegisterIndex == 2) { TAY(); return true; }
-                }
-                else if (registerIndex == 1)
-                {
-                    if (targetRegisterIndex == 0) { TXA(); return true; }
-                }
-                else if (registerIndex == 2)
-                {
-                    if (targetRegisterIndex == 0) { TYA(); return true; }
-                }
+                if (targetRegisterIndex == 1) { TAX(); return true; }
+                else if (targetRegisterIndex == 2) { TAY(); return true; }
             }
-            else
+            else if (registerIndex == 1)
             {
-                ChangeRegister(targetRegisterIndex);
+                if (targetRegisterIndex == 0) { TXA(); return true; }
+            }
+            else if (registerIndex == 2)
+            {
+                if (targetRegisterIndex == 0) { TYA(); return true; }
+            }
+        }
+        return false;
+    }
+    
+    private bool GetInputMainTransfer(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.A:
+                return HandleInputTransfer(0, keyMod);
+            case ConsoleKey.X:
+                return HandleInputTransfer(1, keyMod);
+            case ConsoleKey.Y:
+                return HandleInputTransfer(2, keyMod);
+            case ConsoleKey.Escape:
                 return true;
-            }
+
+        }
+        return false;
+    }
+    
+    private bool GetInputMainStore(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.D0:
+                return HandleInputStore(0, keyMod);
+            case ConsoleKey.D1:
+                return HandleInputStore(1, keyMod);
+            case ConsoleKey.D2:
+                return HandleInputStore(2, keyMod);
+            case ConsoleKey.D3:
+                return HandleInputStore(3, keyMod);
+            case ConsoleKey.D4:
+                return HandleInputStore(4, keyMod);
+            case ConsoleKey.D5:
+                return HandleInputStore(5, keyMod);
+            case ConsoleKey.D6:
+                return HandleInputStore(6, keyMod);
+            case ConsoleKey.D7:
+                return HandleInputStore(7, keyMod);
+            case ConsoleKey.Escape:
+                return true;
+
+        }
+        return false;
+    }
+    
+    private bool GetInputMainLoad(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.D0:
+                return HandleInputLoad(0, keyMod);
+            case ConsoleKey.D1:
+                return HandleInputLoad(1, keyMod);
+            case ConsoleKey.D2:
+                return HandleInputLoad(2, keyMod);
+            case ConsoleKey.D3:
+                return HandleInputLoad(3, keyMod);
+            case ConsoleKey.D4:
+                return HandleInputLoad(4, keyMod);
+            case ConsoleKey.D5:
+                return HandleInputLoad(5, keyMod);
+            case ConsoleKey.D6:
+                return HandleInputLoad(6, keyMod);
+            case ConsoleKey.D7:
+                return HandleInputLoad(7, keyMod);
+            case ConsoleKey.Escape:
+                return true;
+
         }
         return false;
     }
     
     private bool GetInputMainAdd(ConsoleKeyInfo key, bool keyMod)
     {
-        ChangeMainSubState(MAIN_SUB_STATE.DEFAULT);
         switch (key.Key)
         {
             case ConsoleKey.D0:
@@ -779,13 +848,15 @@
             case ConsoleKey.D7:
                 ADC(7, ByteType.Address);
                 return true;
+            case ConsoleKey.Escape:
+                return true;
+
         }
         return false;
     }
     
     private bool GetInputMainSubtract(ConsoleKeyInfo key, bool keyMod)
     {
-        ChangeMainSubState(MAIN_SUB_STATE.DEFAULT);
         switch (key.Key)
         {
             case ConsoleKey.D0:
@@ -812,6 +883,8 @@
             case ConsoleKey.D7:
                 SBC(7, ByteType.Address);
                 return true;
+            case ConsoleKey.Escape:
+                return true;
         }
         return false;
     }
@@ -822,6 +895,15 @@
         // Check if the pressed key is a valid key
         switch (key.Key)
         {
+            case ConsoleKey.S:
+                ChangeMainSubState(MAIN_SUB_STATE.STORE);
+                return true;
+            case ConsoleKey.L:
+                ChangeMainSubState(MAIN_SUB_STATE.LOAD);
+                return true;
+            case ConsoleKey.T:
+                ChangeMainSubState(MAIN_SUB_STATE.TRANSFER);
+                return true;
             case ConsoleKey.Add:
                 if (registerIndex == 0) { ChangeMainSubState(MAIN_SUB_STATE.ADD); return true; }
                 return false;
@@ -836,42 +918,19 @@
                 if (overflowFlag) { CLV(); return true; }
                 return false;
             case ConsoleKey.A:
-                return HandleInputReg(0, keyMod);
+                if (registerIndex != 0) { ChangeRegister(0); return true; }
+                return false;
             case ConsoleKey.X:
-                return HandleInputReg(1, keyMod);
+                if (registerIndex != 1) { ChangeRegister(1); return true; }
+                return false;
             case ConsoleKey.Y:
-                return HandleInputReg(2, keyMod);
-            case ConsoleKey.D0:
-                return HandleInputNum(0,keyMod);
-            case ConsoleKey.D1:
-                return HandleInputNum(1,keyMod);
-            case ConsoleKey.D2:
-                return HandleInputNum(2,keyMod);
-            case ConsoleKey.D3:
-                return HandleInputNum(3,keyMod);
-            case ConsoleKey.D4:
-                return HandleInputNum(4,keyMod);
-            case ConsoleKey.D5:
-                return HandleInputNum(5,keyMod);
-            case ConsoleKey.D6:
-                return HandleInputNum(6,keyMod);
-            case ConsoleKey.D7:
-                return HandleInputNum(7,keyMod);
+                if (registerIndex != 2) { ChangeRegister(2); return true; }
+                return false;
             case ConsoleKey.LeftArrow:
-                if (registerIndex == 0) 
-                { 
-                    if (keyMod) { ROL(); } 
-                    else { ASL(); }
-                    return true;
-                }
+                if (registerIndex == 0) { ASL(); return true; }
                 return false;
             case ConsoleKey.RightArrow:
-                if (registerIndex == 0) 
-                { 
-                    if (keyMod) { ROR(); } 
-                    else { LSR(); }
-                    return true;
-                }
+                if (registerIndex == 0) { LSR(); return true; }
                 return false;
             case ConsoleKey.UpArrow:
                 Increment();
@@ -879,10 +938,10 @@
             case ConsoleKey.DownArrow:
                 Decrement();
                 return true;
-            case ConsoleKey.L:
+            case ConsoleKey.M:
                 ChangeState(STATE.ASSEMBLY);
                 return true;
-            case ConsoleKey.S:
+            case ConsoleKey.P:
                 ChangeState(STATE.SETTINGS);
                 return true;
             case ConsoleKey.Escape:
@@ -1002,10 +1061,19 @@
                             validKey = GetInputMain(key, keyMod);
                             break;
                         case MAIN_SUB_STATE.ADD:
-                            validKey = GetInputMainAdd(key, keyMod);
+                            if (validKey = GetInputMainAdd(key, keyMod)) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
                             break;
                         case MAIN_SUB_STATE.SUBTRACT:
-                            validKey = GetInputMainSubtract(key, keyMod);
+                            if (validKey = GetInputMainSubtract(key, keyMod)) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
+                            break;
+                        case MAIN_SUB_STATE.TRANSFER:
+                            if (validKey = GetInputMainTransfer(key, keyMod)) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
+                            break;
+                        case MAIN_SUB_STATE.STORE:
+                            if (validKey = GetInputMainStore(key, keyMod)) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
+                            break;
+                        case MAIN_SUB_STATE.LOAD:
+                            if (validKey = GetInputMainLoad(key, keyMod)) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
                             break;
                     }
                     break;
@@ -1032,6 +1100,145 @@
         Console.WriteLine(COLORS.FG_BLACK + COLORS.BG_BRIGHT_CYAN + (MAIN_TITLE.PadLeft((RENDER_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(RENDER_WIDTH, ' ') + COLORS.DEFAULT);
     }
 
+    // Render status and keybinds for DEFAULT substate
+    private void RenderMainSubStateDefault()
+    {
+        Console.WriteLine(" <A> <X> <Y>       CHANGE ACTIVE REGISTER");
+        Console.WriteLine(" <UP>              INCREMENT                  (N,Z)");
+        Console.WriteLine(" <DOWN>            DECREMENT                  (N,Z)");
+        Console.WriteLine((registerIndex == 0 ? "" : COLORS.FG_BRIGHT_BLACK ) + " <LEFT>            ARITHMETIC SHIFT LEFT      (N,Z,C)");
+        Console.WriteLine(" <RIGHT>           LOGICAL SHIFT RIGHT        (N,Z,C)");
+        //Console.WriteLine(" <A+LEFT>          ROTATE LEFT                (N,Z,C)");
+        //Console.WriteLine(" <A+RIGHT>         ROTATE RIGHT               (N,Z,C)");
+        Console.WriteLine(" <+>               ADD VALUE FROM MEMORY      (N,V,Z,C)");
+        Console.WriteLine(" <->               SUBTRACT VALUE FROM MEMORY (N,V,Z,C)");
+        Console.WriteLine((registerIndex == 0 ? "" : COLORS.DEFAULT ) + " <S>               STORE VALUE IN MEMORY");
+        Console.WriteLine(" <L>               LOAD VALUE FROM MEMORY     (N,Z)");
+        Console.WriteLine(" <T>               TRANSFER VALUE ");
+        Console.WriteLine(" <C>               TOGGLE CARRY FLAG");
+        Console.WriteLine(" <V>               CLEAR OVERFLOW FLAG");
+        Console.WriteLine(" <M>               ASSEMBLY LOG");
+        Console.WriteLine(" <P>               PREFERENCES");
+        //Console.WriteLine(" <:>               COMMAND MODE (NOT IMPLEMENTED)");
+        Console.WriteLine(" <?>               HELP");
+    }
+    
+    // Render status and keybinds for ADD substate
+    private void RenderMainSubStateAdd()
+    {
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " ADC: ADD WITH CARRY " + COLORS.DEFAULT);
+        Console.WriteLine(" <0>               ADC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <1>               ADC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <2>               ADC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <3>               ADC $03 (" + ByteToString(memory[3]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <4>               ADC $04 (" + ByteToString(memory[4]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <5>               ADC $05 (" + ByteToString(memory[5]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <6>               ADC $06 (" + ByteToString(memory[6]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <7>               ADC $07 (" + ByteToString(memory[7]) + ")         (N,V,Z,C)");
+    }
+    
+    // Render status and keybinds for SUBTRACT substate
+    private void RenderMainSubStateSubtract()
+    {
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " SBC: SUBTRACT WITH CARRY " + COLORS.DEFAULT);
+        Console.WriteLine(" <0>               SBC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <1>               SBC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <2>               SBC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <3>               SBC $03 (" + ByteToString(memory[3]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <4>               SBC $04 (" + ByteToString(memory[4]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <5>               SBC $05 (" + ByteToString(memory[5]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <6>               SBC $06 (" + ByteToString(memory[6]) + ")         (N,V,Z,C)");
+        Console.WriteLine(" <7>               SBC $07 (" + ByteToString(memory[7]) + ")         (N,V,Z,C)");
+    }
+
+    // Render status and keybinds for STORE substate
+    private void RenderMainSubStateStore()
+    {
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " STORE VALUE IN MEMORY " + COLORS.DEFAULT);
+        Console.WriteLine(" <0>               ST" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")");
+        Console.WriteLine(" <1>               ST" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")");
+        Console.WriteLine(" <2>               ST" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")");
+        Console.WriteLine(" <3>               ST" + GetRegisterChar(registerIndex) + " $03 (" + ByteToString(memory[3]) + ")");
+        Console.WriteLine(" <4>               ST" + GetRegisterChar(registerIndex) + " $04 (" + ByteToString(memory[4]) + ")");
+        Console.WriteLine(" <5>               ST" + GetRegisterChar(registerIndex) + " $05 (" + ByteToString(memory[5]) + ")");
+        Console.WriteLine(" <6>               ST" + GetRegisterChar(registerIndex) + " $06 (" + ByteToString(memory[6]) + ")");
+        Console.WriteLine(" <7>               ST" + GetRegisterChar(registerIndex) + " $07 (" + ByteToString(memory[7]) + ")");
+    }
+
+    // Render status and keybinds for LOAD substate
+    private void RenderMainSubStateLoad()
+    {
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " LOAD VALUE FROM MEMORY " + COLORS.DEFAULT);
+        Console.WriteLine(" <0>               LD" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <1>               LD" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")         (N,Z)");
+        Console.WriteLine(" <2>               LD" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")         (N,Z)");
+        Console.WriteLine(" <3>               LD" + GetRegisterChar(registerIndex) + " $03 (" + ByteToString(memory[3]) + ")         (N,Z)");
+        Console.WriteLine(" <4>               LD" + GetRegisterChar(registerIndex) + " $04 (" + ByteToString(memory[4]) + ")         (N,Z)");
+        Console.WriteLine(" <5>               LD" + GetRegisterChar(registerIndex) + " $05 (" + ByteToString(memory[5]) + ")         (N,Z)");
+        Console.WriteLine(" <6>               LD" + GetRegisterChar(registerIndex) + " $06 (" + ByteToString(memory[6]) + ")         (N,Z)");
+        Console.WriteLine(" <7>               LD" + GetRegisterChar(registerIndex) + " $07 (" + ByteToString(memory[7]) + ")         (N,Z)");
+    }
+
+    // Render status and keybinds for TRANSFER substate
+    private void RenderMainSubStateTransfer()
+    {
+        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " TRANSFER VALUE TO " + (registerIndex == 0 ? "REGISTER" : "ACCUMULATOR" ) + " " + COLORS.DEFAULT);
+        
+        if (registerIndex == 0) 
+        {
+            Console.WriteLine(" <X>               TAX                    (N,Z)");
+            Console.WriteLine(" <Y>               TAY                    (N,Z)");
+        }
+        else if (registerIndex == 1) 
+        {
+            Console.WriteLine(" <A>               TXA                    (N,Z)");
+            Console.WriteLine();
+        }
+        else if (registerIndex == 2) 
+        {
+            Console.WriteLine(" <A>               TYA                    (N,Z)");
+            Console.WriteLine();
+        }
+    }
+
+    // Render status and keybinds for all MAIN substates
+    private void RenderMainSubState()
+    {
+        switch (mainSubState)
+        {
+            case MAIN_SUB_STATE.DEFAULT:
+                RenderMainSubStateDefault();
+                break;
+            case MAIN_SUB_STATE.ADD:
+                RenderMainSubStateAdd();
+                break;
+            case MAIN_SUB_STATE.SUBTRACT:
+                RenderMainSubStateSubtract();
+                break;
+            case MAIN_SUB_STATE.STORE:
+                RenderMainSubStateStore();
+                break;
+            case MAIN_SUB_STATE.LOAD:
+                RenderMainSubStateLoad();
+                break;
+            case MAIN_SUB_STATE.TRANSFER:
+                RenderMainSubStateTransfer();
+                break;
+        }
+
+        // Add empty lines to fill RENDER_HEIGHT
+        for (int i = Console.CursorTop; i < RENDER_HEIGHT - 2; i++)
+        {
+            Console.WriteLine();
+        }
+        
+        // Footer
+        Console.WriteLine(Lines.seperator[0]);
+        if (mainSubState == MAIN_SUB_STATE.DEFAULT) { Console.WriteLine(" PRESS <ESC> TO QUIT PROGRAM"); }
+        else { Console.WriteLine(" PRESS <ESC> TO RETURN TO NORMAL MODE"); }
+
+    }
+
     // Render the MAIN screen
     private void RenderMain()
     {
@@ -1051,11 +1258,22 @@
             registerLine += "  " + GetRegisterChar(i) + "  ";
             if (i == registerIndex) { registerLine += COLORS.DEFAULT; }
             registerLine += "  ";
-            registerLineHex += " 0x" + HexToString(registers[i]) + " ";
-            registerLineHex += " ";
+            registerLineHex += " 0x" + HexToString(registers[i]) + "  ";
         }
         Console.WriteLine(registerLine);
         Console.WriteLine(registerLineHex);
+        Console.WriteLine(Lines.seperator[0]);
+        
+        // Values stored in memory
+        string memoryLine1 = " ";
+        string memoryLine2 = " ";
+        for (byte i = 0; i < MEMORY_NUM; i++)
+        {
+            memoryLine1 += " $" + (i.ToString()).PadLeft(2,'0') + ":  ";
+            memoryLine2 += " 0x" + HexToString(memory[i]) + "  ";
+        }
+        Console.WriteLine(memoryLine1);
+        Console.WriteLine(memoryLine2);
         Console.WriteLine(Lines.seperator[0]);
 
         // Iterate through the x and y coords of the "pixels" and display the digits from the selected register
@@ -1107,28 +1325,9 @@
         RenderMessages();
         
         Console.WriteLine(Lines.seperator[0]);
-        
-        // Keyboard shortcuts
-        Console.WriteLine(" <UP>              INCREMENT                  (N,Z)");
-        Console.WriteLine(" <DOWN>            DECREMENT                  (N,Z)");
-        Console.WriteLine((registerIndex == 0 ? "" : COLORS.FG_BRIGHT_BLACK ) + " <LEFT>            ARITHMETIC SHIFT LEFT      (N,Z,C)");
-        Console.WriteLine(" <RIGHT>           LOGICAL SHIFT RIGHT        (N,Z,C)");
-        Console.WriteLine(" <A+LEFT>          ROTATE LEFT                (N,Z,C)");
-        Console.WriteLine(" <A+RIGHT>         ROTATE RIGHT               (N,Z,C)");
-        Console.WriteLine(" <PLUS> <0> - <7>  ADD VALUE FROM MEMORY      (N,V,Z,C)");
-        Console.WriteLine(" <MINUS> <0> - <7> SUBTRACT VALUE FROM MEMORY (N,V,Z,C)");
-        Console.WriteLine((registerIndex == 0 ? "" : COLORS.DEFAULT ) + " <0> - <7>         STORE VALUE TO MEMORY");
-        Console.WriteLine(" <A+0> - <A+7>     LOAD VALUE FROM MEMORY     (N,Z)");
-        Console.WriteLine(" <A> <X> <Y>       CHANGE ACTIVE REGISTER");
-        Console.WriteLine(" <A+A> <A+X> <A+Y> TRANSFER TO REGISTER ");
-        Console.WriteLine(" <C>               TOGGLE CARRY FLAG");
-        Console.WriteLine(" <V>               CLEAR OVERFLOW FLAG");
-        Console.WriteLine(" <L>               ASSEMBLY LOG");
-        Console.WriteLine(" <S>               SETTINGS");
-        //Console.WriteLine(" <:>               COMMAND MODE (NOT IMPLEMENTED)");
-        Console.WriteLine(" <?>               HELP");
-        Console.WriteLine(Lines.seperator[0]);
-        Console.WriteLine(" PRESS <ESC> TO QUIT PROGRAM");
+
+        // Render status and available keybinds for the current substate
+        RenderMainSubState();
     }
 
     // Render the HELP screen

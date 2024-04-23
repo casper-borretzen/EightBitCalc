@@ -1,3 +1,10 @@
+v7
+ - Added more substates: TRANSFER, STORE and LOAD
+ - Implemented dynamic UI for substates
+ - Added support for different ways to reference values, immediate, absolute, absolute index
+   by using the enum ByteType (Binary, Decimal, Hex, Address)
+ - Added UI element to show values in memory
+
 v6
  - Container class has been split into ContainerScroll and ContainerToggle
    that inherits from the Container base class

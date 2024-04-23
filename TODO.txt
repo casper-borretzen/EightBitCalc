@@ -2,56 +2,33 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
- - Implement better solution for automatically adding one space left side padding
-
- - Improve text on help screen
-
- - Loading/storing opcodes: Add support for immediate, absolute, absolute index etc..
-
- - Add ui for memory
-
- - Add ui for DEFAULT/ADD/SUBTRACT substates
-
- - Add COMMAND substate
-
  - Save assembly log to file as "calc.asm"
-
- - Settings: Save settings to file?
-
- - Add support for commands by pressing ":" followed by opcode (e.g. :STA 01000000)
-    + INC
-    + DEC
-    + ASL
-    + LSR
+ 
+ - Add hotkeys for:
     + ROL
     + ROR
-    + EOR <bits>
-    + AND <bits>
-    + ORA <bits>
-    + ADC <bits>
-    + SBC <bits>
-    + CLC
-    + SEC
-    + CLV
-    + T<FIRST REGISTER><SECOND REGISTER> (e.g. TAB -> TRANSFER A TO B)
+    + EOR
+    + AND
+    + ORA
+
+ - Add COMMAND substate
+    + Enter COMMAND substate by pressing ":"
+    + Followed by opcode (then reference mode + value)
+    + Examples:
+      + :LDA $01        (Load Accumulator with value from memory address 01)
+      + :EOR #50        (Exclusive OR with decimal value 50)
+      + :ADC #%00000001 (Add with carry with binary value 1)
+      + :SBC #$20       (Subtract with carry with hexadecimal value 32)
 
  - UI overhaul
+ 
+ - Implement better solution for automatically adding one space left side padding
+
+ - Write better text for help screen
  
  - Check that all assembly logging is correct
 
  - Check that all flags behave correctly
 
  - Check that all opcodes behave correctly
-
- ? Add debug mode
-
- ? Add frame buffer
-
- ? Change display datatype: string[] display -> bool[,] display
-
- ? Change various ints -> byte
-
- ? Add fake RAM (loading and storing of values in stack)
-
- ? Add changed flags to message log
 
