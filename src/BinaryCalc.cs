@@ -1647,12 +1647,6 @@
                 else if (registerIndex == 2) { TYA(); }
                 else { ChangeMainSubState(MAIN_SUB_STATE.TRANSFER); }
                 return true;
-            case ConsoleKey.Add:
-                if (registerIndex == 0) { ChangeMainSubState(MAIN_SUB_STATE.ADD); return true; }
-                return false;
-            case ConsoleKey.Subtract:
-                if (registerIndex == 0) { ChangeMainSubState(MAIN_SUB_STATE.SUBTRACT); return true; }
-                return false;
             case ConsoleKey.C:
                 if (carryFlag) { CLC(); }
                 else { SEC(); }
@@ -1703,6 +1697,12 @@
         }
         switch (key.KeyChar)
         {
+            case '+':
+                if (registerIndex == 0) { ChangeMainSubState(MAIN_SUB_STATE.ADD); return true; }
+                return false;
+            case '-':
+                if (registerIndex == 0) { ChangeMainSubState(MAIN_SUB_STATE.SUBTRACT); return true; }
+                return false;
             case '?':
                 ChangeState(STATE.HELP);
                 return true;
