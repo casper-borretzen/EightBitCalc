@@ -25,7 +25,7 @@ public abstract class Container {
     // Get the current scroll index as a string
     public string GetScrollPos()
     {
-        return scrollMax == 0 ? "" : "(" + (scrollPos.ToString()).PadLeft(2,'0') + "/" + (scrollMax.ToString()).PadLeft(2,'0') + ")";
+        return scrollMax == 0 ? "" : "(" + (scrollPos.ToString()).PadLeft(3,'0') + "/" + (scrollMax.ToString()).PadLeft(3,'0') + ")";
     }
 
     // Set the max scroll value

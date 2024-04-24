@@ -1,4 +1,4 @@
-v8
+v8.0.0
  - Added more substates: LOGICAL, AND, ORA, EOR with hotkeys and menus
  - Main UI overhaul
  - Added rotation hotkeys
@@ -8,15 +8,20 @@ v8
  - Implemented saving of assembly log to file (log.asm)
  - Added version no. (on the HELP screen)
  - Small HELP edit
+ - Added support for different input modes for directly inputting numbers
+ - Implemented different input modes for all relevant operations
+ - Made keyinput descriptions dynamic
+ - Added more text to the HELP screen
+ - Fixed a number of typos and various small errors
 
-v7
+v7.0.0
  - Added more substates: TRANSFER, STORE and LOAD
  - Implemented dynamic UI for substates
  - Added support for different ways to reference values, immediate, absolute, absolute index
    by using the enum ByteType (Binary, Decimal, Hex, Address)
  - Added UI element to show values in memory
 
-v6
+v6.0.0
  - Container class has been split into ContainerScroll and ContainerToggle
    that inherits from the Container base class
  - Made COLORS global variables
@@ -32,13 +37,13 @@ v6
  - Redone keybindings
  - Added ADD and SUBTRACT substates
  
-v5
+v5.0.0
  - Container class:
    + Added display of scroll index/max for containers
    + Scroll index resets on STATE change
    + Start scroll index at max (for ASSEMBLY log)
    + Add optional line numbering (for ASSEMBLY log)
-v4
+v4.0.0
  - Added error handling and error STATE
  - Added check of window size and throwing error if window size is too small
  - Added a new class Container for holding scrollable lines of text
@@ -47,18 +52,18 @@ v4
  - Added ASSEMBLY state with assembly code log using the Container class
  - Added SETTINGS state that is empty for now
 
-v3
+v3.0.0
  - Removed Console.Clear for every render call, replaced with setting the cursor
    to position 0,0 and drawing a fixed number (40) of blank lines every render call
  - Added some more info to the HELP screen
  - The [?] HELP hotkey display is removed (until the HELP screen is completed, 
    the HELP screen can still be accessed by pressing ? though)
 
-v2
+v2.0.0
  - Added highlighting of the bits changed during the last operation
  - Only refresh render if input is valid
  - Added state machine with two states for the program: MAIN and HELP
  - Added sketch of the help screen
 
-v1
+v1.0.0
   - First version

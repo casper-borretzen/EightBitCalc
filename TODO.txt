@@ -2,33 +2,13 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
- - Add support for custom values in operations
-   + <D>
-     + :EOR #50        (Exclusive OR with decimal value 50)
-   + <B>
-     + :ADC #%00000001 (Add with carry with binary value 1)
-   + <H>
-     + :SBC #$20       (Subtract with carry with hexadecimal value 32)
-
- - Write better text for help screen
+ ? Add history to NUMERICAL input mode
  
- - Check that all assembly logging is correct
+ ? Add ":" command mode
 
- - Check that all flags behave correctly
+ ? Add absolute indexed support (e.g. STA $02,X (02 + X))
 
- - Check that all opcodes behave correctly
- 
- ? Colors as variables in Dictionary<string, string> (colors["titlebar"], colors["flag_on"], etc.)
- 
- ? Implement better solution for automatically adding one space left side padding
-
- ? Restructure project, split up into multiple classes/files
-
- ? Load asm from file
-
- ? Change all ints to bytes
-
- ? Missing opcodes:
+ ? Add missing opcodes:
    + Stack operations:
      + TSX: Transfer stack pointer to X
      + TXS: Transfer X to stack pointer
@@ -42,5 +22,22 @@
    + CPY: Compare Y register
    + INC: Increment a memory location
    + DEC: Decrement a memory location
+ 
+ ? The code is quite messy: Restructure project, split up into multiple classes/files
 
+ ? Option to toggle assembly logging to file on/off (log.asm)
+
+ ? Merge duplicates when possible in assembly log (for ADC/SBC, e.g. (ADC #%00000001, ADC #%00000001) -> ADC #%00000002)
+
+ ? Colors as variables in Dictionary<string, string> (colors["titlebar"], colors["flag_on"], etc.)
+
+ ? Color customization in Preferences
+ 
+ ? Implement better solution for automatically adding one space left side padding
+
+ ? Change all ints to bytes
+
+ ? Load .asm from file and run instructions
+
+ ? Save preferences and memory to file
 

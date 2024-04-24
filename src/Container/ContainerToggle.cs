@@ -53,7 +53,7 @@ public class ContainerToggle : Container
     
     // Render the container header
     protected override void RenderHeader(){
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + (" " + base.title + " " + COLORS.DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(" " + BinaryCalc.COLOR_BG_BRIGHT_MAGENTA + BinaryCalc.COLOR_FG_BLACK + (" " + base.title + " " + BinaryCalc.COLOR_DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
         Console.WriteLine(BinaryCalc.seperator[0]);
     }
     

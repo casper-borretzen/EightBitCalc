@@ -1,8 +1,10 @@
 # EightBitCalc
 
-A CLI 8-bit binary calculator made with the C# programming language.
+An 8-bit binary calculator made with the C# programming language.
 
-Available operations and flags are inspired by the 6502 processor.
+Available operations and flags mimick the 6502 processor.
+
+Made with the intention of being a learning tool for understanding binary operations and 6502 assembly code.
 
 ![screenshot](screenshots/screenshot_00.png?raw=true "screenshot")
 

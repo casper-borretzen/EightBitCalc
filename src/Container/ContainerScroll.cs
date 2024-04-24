@@ -40,7 +40,7 @@ public class ContainerScroll : Container
 
     // Render the container header
     protected override void RenderHeader(){
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + (" " + base.title + " " + COLORS.DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
+        Console.WriteLine(" " + BinaryCalc.COLOR_BG_BRIGHT_MAGENTA + BinaryCalc.COLOR_FG_BLACK + (" " + base.title + " " + BinaryCalc.COLOR_DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
         Console.WriteLine(BinaryCalc.seperator[0]);
     }
 
@@ -57,7 +57,7 @@ public class ContainerScroll : Container
                 if (showLineNum)
                 {
                     int lineNumDigits = (base.contentSize).ToString().Length;
-                    line = " " + COLORS.BG_BRIGHT_BLACK + COLORS.FG_DARK_WHITE + " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + COLORS.DEFAULT + " " + line;
+                    line = " " + BinaryCalc.COLOR_BG_BRIGHT_BLACK + BinaryCalc.COLOR_FG_DARK_WHITE + " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + BinaryCalc.COLOR_DEFAULT + " " + line;
                 }
 
                 // Render content
