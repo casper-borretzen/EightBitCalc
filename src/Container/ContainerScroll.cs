@@ -41,7 +41,7 @@ public class ContainerScroll : Container
     // Render the container header
     protected override void RenderHeader(){
         Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + (" " + base.title + " " + COLORS.DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
-        Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine(BinaryCalc.seperator[0]);
     }
 
     // Render the content of a SCROLL type container

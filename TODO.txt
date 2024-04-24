@@ -2,40 +2,13 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
- - scroll message log (shift + up / down)
-
- - ROL ROR < >
-
- - colors as vars
- 
- - save settings and memory to disk?
-
- - Opcounter + other stats?
-
- - Version number in help screen
-
- - Move Lines to BinaryCalc.cs
-
  - Add support for custom values in operations
-
- - Quit confirmation
-
- - Save assembly log to file as "calc.asm"
- 
- - Add hotkeys for:
-    + ROL
-    + ROR
-
- - Add COMMAND substate
-    + Enter COMMAND substate by pressing ":"
-    + Followed by opcode (then reference mode + value)
-    + Examples:
-      + :LDA $01        (Load Accumulator with value from memory address 01)
-      + :EOR #50        (Exclusive OR with decimal value 50)
-      + :ADC #%00000001 (Add with carry with binary value 1)
-      + :SBC #$20       (Subtract with carry with hexadecimal value 32)
-
- - Implement better solution for automatically adding one space left side padding
+   + <D>
+     + :EOR #50        (Exclusive OR with decimal value 50)
+   + <B>
+     + :ADC #%00000001 (Add with carry with binary value 1)
+   + <H>
+     + :SBC #$20       (Subtract with carry with hexadecimal value 32)
 
  - Write better text for help screen
  
@@ -44,6 +17,30 @@
  - Check that all flags behave correctly
 
  - Check that all opcodes behave correctly
+ 
+ ? Colors as variables in Dictionary<string, string> (colors["titlebar"], colors["flag_on"], etc.)
+ 
+ ? Implement better solution for automatically adding one space left side padding
 
- - Restructure/clean up project
+ ? Restructure project, split up into multiple classes/files
+
+ ? Load asm from file
+
+ ? Change all ints to bytes
+
+ ? Missing opcodes:
+   + Stack operations:
+     + TSX: Transfer stack pointer to X
+     + TXS: Transfer X to stack pointer
+     + PHA: Push accumulator on stack
+     + PHP: Push processor status on stack
+     + PLA: Pull accumulator from stack
+     + PLP: Pull processor status from stack
+   + BIT: Bit Test
+   + CMP: Compare accumulator
+   + CPX: Compare X register
+   + CPY: Compare Y register
+   + INC: Increment a memory location
+   + DEC: Decrement a memory location
+
 

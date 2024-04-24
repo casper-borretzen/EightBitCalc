@@ -92,7 +92,7 @@ public abstract class Container {
     // Render the container footer
     private void RenderFooter()
     {
-        Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine(BinaryCalc.seperator[0]);
         Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + GetScrollPos().PadLeft(17));
     }
 

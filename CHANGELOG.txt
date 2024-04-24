@@ -1,6 +1,13 @@
 v8
  - Added more substates: LOGICAL, AND, ORA, EOR with hotkeys and menus
  - Main UI overhaul
+ - Added rotation hotkeys
+ - Added scrolling in message log
+ - Added quit confirmation
+ - Code cleanup
+ - Implemented saving of assembly log to file (log.asm)
+ - Added version no. (on the HELP screen)
+ - Small HELP edit
 
 v7
  - Added more substates: TRANSFER, STORE and LOAD
