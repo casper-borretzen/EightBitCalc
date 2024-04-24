@@ -1,3 +1,7 @@
+v8
+ - Added more substates: LOGICAL, AND, ORA, EOR with hotkeys and menus
+ - Main UI overhaul
+
 v7
  - Added more substates: TRANSFER, STORE and LOAD
  - Implemented dynamic UI for substates

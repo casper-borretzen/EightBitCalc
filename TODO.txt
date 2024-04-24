@@ -2,14 +2,29 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
+ - scroll message log (shift + up / down)
+
+ - ROL ROR < >
+
+ - colors as vars
+ 
+ - save settings and memory to disk?
+
+ - Opcounter + other stats?
+
+ - Version number in help screen
+
+ - Move Lines to BinaryCalc.cs
+
+ - Add support for custom values in operations
+
+ - Quit confirmation
+
  - Save assembly log to file as "calc.asm"
  
  - Add hotkeys for:
     + ROL
     + ROR
-    + EOR
-    + AND
-    + ORA
 
  - Add COMMAND substate
     + Enter COMMAND substate by pressing ":"
@@ -20,8 +35,6 @@
       + :ADC #%00000001 (Add with carry with binary value 1)
       + :SBC #$20       (Subtract with carry with hexadecimal value 32)
 
- - UI overhaul
- 
  - Implement better solution for automatically adding one space left side padding
 
  - Write better text for help screen
@@ -31,4 +44,6 @@
  - Check that all flags behave correctly
 
  - Check that all opcodes behave correctly
+
+ - Restructure/clean up project
 

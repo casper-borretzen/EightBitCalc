@@ -17,7 +17,12 @@
         SUBTRACT,
         TRANSFER,
         STORE,
-        LOAD
+        LOAD,
+        LOGICAL,
+        EOR,
+        AND,
+        ORA,
+        QUIT
     };
 
     private enum ByteType 
@@ -38,9 +43,10 @@
     private bool[,,] DIGITS = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
     private const string MAIN_TITLE = "8-BIT BINARY CALCULATOR";
     private const int RENDER_WIDTH = CHAR_LIMIT * CHAR_WIDTH;
-    private const int RENDER_HEIGHT = 50;
+    private const int RENDER_HEIGHT = 53;
     private const int REGISTER_NUM = 3;
     private const int MEMORY_NUM = 8;
+    private const int MESSAGES_NUM = 8;
 
     // Set global variables
     private bool running = true;
@@ -58,6 +64,7 @@
     private bool overflowFlag = false;
     private int windowWidth = 0;
     private int windowHeight = 0;
+    private int messageIndex = 0;
 
     // Declare logger
     public List<string> messages = new List<string>();
@@ -137,6 +144,7 @@
     public void AddMessage(string line)
     {
         messages.Add(DateTime.Now.ToString("HH:mm:ss") + " " + line.ToUpper());
+        messageIndex = 0;
     }
 
     // Add assembly code to the assembly log
@@ -146,12 +154,24 @@
     }
 
     // Render message log
-    public void RenderMessages(int num = 8)
+    public void RenderMessages(int num = MESSAGES_NUM)
     {
-        for (int i = num; i >= 0; i--)
+        for (int i = num - 1; i >= 0; i--)
         {
-            Console.WriteLine(messages.Count > i ? " " + messages[messages.Count-(i+1)] : " -");
+            Console.WriteLine(messages.Count > i + messageIndex ? " " + messages[messages.Count-(i+1+messageIndex)] : " -");
         }
+    }
+
+    public bool MessagesUp()
+    {
+        if ((messageIndex + MESSAGES_NUM) < messages.Count) { messageIndex++; return true; }
+        return false;
+    }
+    
+    public bool MessagesDown()
+    {
+        if (messageIndex > 0) { messageIndex--; return true; }
+        return false;
     }
 
     // Convert a byte to an eight digit string string
@@ -399,7 +419,7 @@
         registers[0] = (byte)(registers[0] & bits);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "AND: Logical AND              <- " + ByteToString(bits)); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "AND: Logical AND               (" + ByteToString(bits) + ")"); }
         AddAssembly("AND " + asm); 
     } 
 
@@ -412,7 +432,7 @@
         registers[0] = (byte)(registers[0] | bits);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ORA: Logical Inclusive OR     <- " + ByteToString(bits)); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ORA: Logical Inclusive OR      (" + ByteToString(bits) + ")"); }
         AddAssembly("ORA " + asm); 
     }
 
@@ -425,7 +445,7 @@
         registers[0] = (byte)(registers[0] ^ bits);
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "EOR: Exclusive OR             <- " + ByteToString(bits)); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "EOR: Exclusive OR              (" + ByteToString(bits) + ")"); }
         AddAssembly("EOR " + asm);
     }
 
@@ -438,7 +458,7 @@
         registers[0] = bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "LDA: Load Accumulator         <- " + ByteToString(bits)); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "LDA: Load Accumulator          (" + ByteToString(bits) + ")"); }
         AddAssembly("LDA " + asm); 
     }
 
@@ -451,7 +471,7 @@
         registers[1] = bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "LDX: Load X Register          <- " + ByteToString(bits)); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "LDX: Load X Register           (" + ByteToString(bits) + ")"); }
         AddAssembly("LDX " + asm); 
     }
 
@@ -464,7 +484,7 @@
         registers[2] = bits;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "LDY: Load Y Register          <- " + ByteToString(bits)); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "LDY: Load Y Register           (" + ByteToString(bits) + ")"); }
         AddAssembly("LDY " + asm); 
     }
 
@@ -472,7 +492,7 @@
     private void STA(byte position, bool silent = false)
     {
         memory[position] = registers[0];
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "STA: Store Accumulator        <- " + ByteToString(memory[position])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "STA: Store Accumulator         (" + ByteToString(memory[position]) + ")"); }
         AddAssembly("STA $" + HexToString(position)); 
     }
 
@@ -480,7 +500,7 @@
     private void STX(byte position, bool silent = false)
     {
         memory[position] = registers[1];
-        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "STX: Store X Register         <- " + ByteToString(memory[position])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "STX: Store X Register          (" + ByteToString(memory[position]) + ")"); }
         AddAssembly("STX $" + HexToString(position)); 
     }
 
@@ -488,7 +508,7 @@
     private void STY(byte position, bool silent = false)
     {
         memory[position] = registers[2];
-        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "STY: Store Y Register         <- " + ByteToString(memory[position])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "STY: Store Y Register          (" + ByteToString(memory[position]) + ")"); }
         AddAssembly("STY $" + HexToString(position)); 
     }
 
@@ -500,7 +520,7 @@
         registers[1] = registers[0];
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "TAX: Transfer A to X          <- " + ByteToString(registers[0])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "TAX: Transfer A to X           (" + ByteToString(registers[0]) + ")"); }
         AddAssembly("TAX"); 
     }
 
@@ -512,7 +532,7 @@
         registers[2] = registers[0];
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "TAY: Transfer A to Y          <- " + ByteToString(registers[0])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "TAY: Transfer A to Y           (" + ByteToString(registers[0]) + ")"); }
         AddAssembly("TAY"); 
     }
 
@@ -524,7 +544,7 @@
         registers[0] = registers[1];
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "TXA: Transfer X to A          <- " + ByteToString(registers[1])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(1) + "] " + "TXA: Transfer X to A           (" + ByteToString(registers[1]) + ")"); }
         AddAssembly("TXA"); 
     }
 
@@ -536,7 +556,7 @@
         registers[0] = registers[2];
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "TYA: Transfer Y to A          <- " + ByteToString(registers[2])); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(2) + "] " + "TYA: Transfer Y to A           (" + ByteToString(registers[2]) + ")"); }
         AddAssembly("TYA"); 
     }
 
@@ -645,36 +665,36 @@
     // Add with carry operation
     private void ADC(byte bits, ByteType type = ByteType.Binary, bool silent = false, bool inc = false)
     {
-        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
         if (settings["flagsAutoCarry"].enabled && carryFlag) { CLC(); }
         if (carryFlag && inc) { bits = 0b00000000; }
+        FormatByteType(bits, type, out bits, out string asm);
         byte bitsWithCarry = (byte)(bits + (byte)(carryFlag ? 0b00000001 : 0b00000000));
         if (((registers[0] & 0b10000000) == 0b10000000) && (((registers[0] + bits) & 0b10000000) == 0b00000000)) { carryFlag = true; }
         if (((registers[0] & 0b10000000) == 0b00000000) && (((registers[0] + bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
         registers[0] += bitsWithCarry;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ADC: Add with carry           <- " + ByteToString(bitsWithCarry) ); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "ADC: Add with carry            (" + ByteToString(bitsWithCarry) + ")" ); }
         AddAssembly("ADC " + asm);
     }
 
     // Subtract with carry operation
     private void SBC(byte bits, ByteType type = ByteType.Binary, bool silent = false, bool dec = false)
     {
-        FormatByteType(bits, type, out bits, out string asm);
         registersPrev[0] = registers[0];
         UnsetFlags();
         if (settings["flagsAutoCarry"].enabled && !carryFlag) { SEC(); }
         if (!carryFlag && dec) { bits = 0b00000000; }
+        FormatByteType(bits, type, out bits, out string asm);
         byte bitsWithCarry = (byte)(bits + (byte)(carryFlag ? 0b00000000 : 0b00000001));
         if (registers[0] - bits < 0) { carryFlag = false; }
         if (((registers[0] & 0b10000000) == 0b00000000) && (((registers[0] - bits) & 0b10000000) == 0b10000000)) { overflowFlag = true; }
         registers[0] -= bitsWithCarry;
         SetZeroFlag();
         SetNegativeFlag();
-        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "SBC: Subtract with carry      <- " + ByteToString(bitsWithCarry) ); }
+        if (!silent) { AddMessage("[" + GetRegisterChar(0) + "] " + "SBC: Subtract with carry       (" + ByteToString(bitsWithCarry) + ")" ); }
         AddAssembly("SBC " + asm);
     }
 
@@ -819,6 +839,149 @@
         }
         return false;
     }
+
+    private bool GetInputMainQuit(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.Y:
+                running = false;
+                return true;
+            case ConsoleKey.N:
+                ChangeMainSubState(MAIN_SUB_STATE.DEFAULT);
+                return true;
+        }
+        return false;
+    }
+
+    private bool GetInputMainLogical(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.A:
+                ChangeMainSubState(MAIN_SUB_STATE.AND);
+                return true;
+            case ConsoleKey.E:
+                ChangeMainSubState(MAIN_SUB_STATE.EOR);
+                return true;
+            case ConsoleKey.O:
+                ChangeMainSubState(MAIN_SUB_STATE.ORA);
+                return true;
+            case ConsoleKey.Escape:
+                ChangeMainSubState(MAIN_SUB_STATE.DEFAULT);
+                return true;
+
+        }
+        return false;
+    }
+
+    private bool GetInputMainAnd(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.D0:
+                AND(0, ByteType.Address);
+                return true;
+            case ConsoleKey.D1:
+                AND(1, ByteType.Address);
+                return true;
+            case ConsoleKey.D2:
+                AND(2, ByteType.Address);
+                return true;
+            case ConsoleKey.D3:
+                AND(3, ByteType.Address);
+                return true;
+            case ConsoleKey.D4:
+                AND(4, ByteType.Address);
+                return true;
+            case ConsoleKey.D5:
+                AND(5, ByteType.Address);
+                return true;
+            case ConsoleKey.D6:
+                AND(6, ByteType.Address);
+                return true;
+            case ConsoleKey.D7:
+                AND(7, ByteType.Address);
+                return true;
+            case ConsoleKey.Escape:
+                ChangeMainSubState(MAIN_SUB_STATE.LOGICAL);
+                return true;
+
+        }
+        return false;
+    }
+
+    private bool GetInputMainEor(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.D0:
+                EOR(0, ByteType.Address);
+                return true;
+            case ConsoleKey.D1:
+                EOR(1, ByteType.Address);
+                return true;
+            case ConsoleKey.D2:
+                EOR(2, ByteType.Address);
+                return true;
+            case ConsoleKey.D3:
+                EOR(3, ByteType.Address);
+                return true;
+            case ConsoleKey.D4:
+                EOR(4, ByteType.Address);
+                return true;
+            case ConsoleKey.D5:
+                EOR(5, ByteType.Address);
+                return true;
+            case ConsoleKey.D6:
+                EOR(6, ByteType.Address);
+                return true;
+            case ConsoleKey.D7:
+                EOR(7, ByteType.Address);
+                return true;
+            case ConsoleKey.Escape:
+                ChangeMainSubState(MAIN_SUB_STATE.LOGICAL);
+                return true;
+
+        }
+        return false;
+    }
+
+    private bool GetInputMainOra(ConsoleKeyInfo key, bool keyMod)
+    {
+        switch (key.Key)
+        {
+            case ConsoleKey.D0:
+                ORA(0, ByteType.Address);
+                return true;
+            case ConsoleKey.D1:
+                ORA(1, ByteType.Address);
+                return true;
+            case ConsoleKey.D2:
+                ORA(2, ByteType.Address);
+                return true;
+            case ConsoleKey.D3:
+                ORA(3, ByteType.Address);
+                return true;
+            case ConsoleKey.D4:
+                ORA(4, ByteType.Address);
+                return true;
+            case ConsoleKey.D5:
+                ORA(5, ByteType.Address);
+                return true;
+            case ConsoleKey.D6:
+                ORA(6, ByteType.Address);
+                return true;
+            case ConsoleKey.D7:
+                ORA(7, ByteType.Address);
+                return true;
+            case ConsoleKey.Escape:
+                ChangeMainSubState(MAIN_SUB_STATE.LOGICAL);
+                return true;
+
+        }
+        return false;
+    }
     
     private bool GetInputMainAdd(ConsoleKeyInfo key, bool keyMod)
     {
@@ -933,11 +1096,11 @@
                 if (registerIndex == 0) { LSR(); return true; }
                 return false;
             case ConsoleKey.UpArrow:
-                Increment();
-                return true;
+                if (!keyMod) { Increment(); return true; }
+                return false;
             case ConsoleKey.DownArrow:
-                Decrement();
-                return true;
+                if (!keyMod) { Decrement(); return true; }
+                return false;
             case ConsoleKey.M:
                 ChangeState(STATE.ASSEMBLY);
                 return true;
@@ -945,7 +1108,7 @@
                 ChangeState(STATE.SETTINGS);
                 return true;
             case ConsoleKey.Escape:
-                running = false;
+                ChangeMainSubState(MAIN_SUB_STATE.QUIT);
                 return true;
         }
         switch (key.KeyChar)
@@ -953,6 +1116,9 @@
             case '?':
                 ChangeState(STATE.HELP);
                 return true;
+            case '&':
+                if (registerIndex == 0) { ChangeMainSubState(MAIN_SUB_STATE.LOGICAL); return true; }
+                return false;
         }
 
         // No valid input
@@ -1037,6 +1203,23 @@
         // No valid input
         return false;
     }
+    
+    private bool GetInputMainGlobal(ConsoleKeyInfo key, bool keyMod)
+    {
+        // Check if the pressed key is a valid key
+        switch (key.Key)
+        {
+            case ConsoleKey.UpArrow:
+                if(keyMod) { return MessagesUp(); }
+                return false;
+            case ConsoleKey.DownArrow:
+                if(keyMod) { return MessagesDown(); }
+                return false;
+        }
+
+        // No valid input
+        return false;
+    }
 
     // Get input from user
     private void GetInput() 
@@ -1049,14 +1232,18 @@
             ConsoleKeyInfo key = Console.ReadKey(true);
 
             // Check if key modifiers was pressed
-            bool keyMod = key.Modifiers.HasFlag(ConsoleModifiers.Alt);
+            bool keyMod = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
 
             // Call the correct GetInput function for the current application STATE
             switch (appState)
             {
                 case STATE.MAIN:
+                    if (validKey = GetInputMainGlobal(key, keyMod)) { break; }
                     switch (mainSubState)
                     {
+                        case MAIN_SUB_STATE.QUIT:
+                            validKey = GetInputMainQuit(key, keyMod);
+                            break;
                         case MAIN_SUB_STATE.DEFAULT:
                             validKey = GetInputMain(key, keyMod);
                             break;
@@ -1074,6 +1261,21 @@
                             break;
                         case MAIN_SUB_STATE.LOAD:
                             if (validKey = GetInputMainLoad(key, keyMod)) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
+                            break;
+                        case MAIN_SUB_STATE.LOGICAL:
+                            validKey = GetInputMainLogical(key, keyMod);
+                            break;
+                        case MAIN_SUB_STATE.AND:
+                            validKey = GetInputMainAnd(key, keyMod);
+                            if (validKey && key.Key != ConsoleKey.Escape) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
+                            break;
+                        case MAIN_SUB_STATE.EOR:
+                            validKey = GetInputMainEor(key, keyMod);
+                            if (validKey && key.Key != ConsoleKey.Escape) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
+                            break;
+                        case MAIN_SUB_STATE.ORA:
+                            validKey = GetInputMainOra(key, keyMod);
+                            if (validKey && key.Key != ConsoleKey.Escape) { ChangeMainSubState(MAIN_SUB_STATE.DEFAULT); }
                             break;
                     }
                     break;
@@ -1112,6 +1314,7 @@
         //Console.WriteLine(" <A+RIGHT>         ROTATE RIGHT               (N,Z,C)");
         Console.WriteLine(" <+>               ADD VALUE FROM MEMORY      (N,V,Z,C)");
         Console.WriteLine(" <->               SUBTRACT VALUE FROM MEMORY (N,V,Z,C)");
+        Console.WriteLine(" <&>               LOGICAL OPERATIONS         (N,Z)");
         Console.WriteLine((registerIndex == 0 ? "" : COLORS.DEFAULT ) + " <S>               STORE VALUE IN MEMORY");
         Console.WriteLine(" <L>               LOAD VALUE FROM MEMORY     (N,Z)");
         Console.WriteLine(" <T>               TRANSFER VALUE ");
@@ -1124,9 +1327,8 @@
     }
     
     // Render status and keybinds for ADD substate
-    private void RenderMainSubStateAdd()
+    private string RenderMainSubStateAdd()
     {
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " ADC: ADD WITH CARRY " + COLORS.DEFAULT);
         Console.WriteLine(" <0>               ADC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <1>               ADC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <2>               ADC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)");
@@ -1135,12 +1337,12 @@
         Console.WriteLine(" <5>               ADC $05 (" + ByteToString(memory[5]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <6>               ADC $06 (" + ByteToString(memory[6]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <7>               ADC $07 (" + ByteToString(memory[7]) + ")         (N,V,Z,C)");
+        return "ADC: ADD WITH CARRY";
     }
     
     // Render status and keybinds for SUBTRACT substate
-    private void RenderMainSubStateSubtract()
+    private string RenderMainSubStateSubtract()
     {
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " SBC: SUBTRACT WITH CARRY " + COLORS.DEFAULT);
         Console.WriteLine(" <0>               SBC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <1>               SBC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <2>               SBC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)");
@@ -1149,12 +1351,12 @@
         Console.WriteLine(" <5>               SBC $05 (" + ByteToString(memory[5]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <6>               SBC $06 (" + ByteToString(memory[6]) + ")         (N,V,Z,C)");
         Console.WriteLine(" <7>               SBC $07 (" + ByteToString(memory[7]) + ")         (N,V,Z,C)");
+        return "SBC: SUBTRACT WITH CARRY";
     }
 
     // Render status and keybinds for STORE substate
-    private void RenderMainSubStateStore()
+    private string RenderMainSubStateStore()
     {
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " STORE VALUE IN MEMORY " + COLORS.DEFAULT);
         Console.WriteLine(" <0>               ST" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")");
         Console.WriteLine(" <1>               ST" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")");
         Console.WriteLine(" <2>               ST" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")");
@@ -1163,12 +1365,12 @@
         Console.WriteLine(" <5>               ST" + GetRegisterChar(registerIndex) + " $05 (" + ByteToString(memory[5]) + ")");
         Console.WriteLine(" <6>               ST" + GetRegisterChar(registerIndex) + " $06 (" + ByteToString(memory[6]) + ")");
         Console.WriteLine(" <7>               ST" + GetRegisterChar(registerIndex) + " $07 (" + ByteToString(memory[7]) + ")");
+        return "STORE VALUE IN MEMORY";
     }
 
     // Render status and keybinds for LOAD substate
-    private void RenderMainSubStateLoad()
+    private string RenderMainSubStateLoad()
     {
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " LOAD VALUE FROM MEMORY " + COLORS.DEFAULT);
         Console.WriteLine(" <0>               LD" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
         Console.WriteLine(" <1>               LD" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")         (N,Z)");
         Console.WriteLine(" <2>               LD" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")         (N,Z)");
@@ -1177,13 +1379,59 @@
         Console.WriteLine(" <5>               LD" + GetRegisterChar(registerIndex) + " $05 (" + ByteToString(memory[5]) + ")         (N,Z)");
         Console.WriteLine(" <6>               LD" + GetRegisterChar(registerIndex) + " $06 (" + ByteToString(memory[6]) + ")         (N,Z)");
         Console.WriteLine(" <7>               LD" + GetRegisterChar(registerIndex) + " $07 (" + ByteToString(memory[7]) + ")         (N,Z)");
+        return "LOAD VALUE FROM MEMORY";
+    }
+
+    private string RenderMainSubStateLogical()
+    {
+        Console.WriteLine(" <A>               LOGICAL AND                (N,Z)");
+        Console.WriteLine(" <E>               EXCLUSIVE OR               (N,Z)");
+        Console.WriteLine(" <O>               LOGICAL INCLUSIVE OR       (N,Z)");
+        return "LOGICAL OPERATIONS";
+    }
+
+    private string RenderMainSubStateAnd()
+    {
+        Console.WriteLine(" <0>               AND $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <1>               AND $01 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <2>               AND $02 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <3>               AND $03 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <4>               AND $04 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <5>               AND $05 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <6>               AND $06 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <7>               AND $07 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        return "LOGICAL AND";
+    }
+
+    private string RenderMainSubStateEor()
+    {
+        Console.WriteLine(" <0>               EOR $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <1>               EOR $01 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <2>               EOR $02 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <3>               EOR $03 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <4>               EOR $04 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <5>               EOR $05 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <6>               EOR $06 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <7>               EOR $07 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        return "EXCLUSIVE OR";
+    }
+
+    private string RenderMainSubStateOra()
+    {
+        Console.WriteLine(" <0>               ORA $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <1>               ORA $01 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <2>               ORA $02 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <3>               ORA $03 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <4>               ORA $04 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <5>               ORA $05 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <6>               ORA $06 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        Console.WriteLine(" <7>               ORA $07 (" + ByteToString(memory[0]) + ")         (N,Z)");
+        return "LOGICAL INCLUSIVE OR";
     }
 
     // Render status and keybinds for TRANSFER substate
-    private void RenderMainSubStateTransfer()
+    private string RenderMainSubStateTransfer()
     {
-        Console.WriteLine(" " + COLORS.BG_BRIGHT_MAGENTA + COLORS.FG_BLACK + " TRANSFER VALUE TO " + (registerIndex == 0 ? "REGISTER" : "ACCUMULATOR" ) + " " + COLORS.DEFAULT);
-        
         if (registerIndex == 0) 
         {
             Console.WriteLine(" <X>               TAX                    (N,Z)");
@@ -1199,30 +1447,45 @@
             Console.WriteLine(" <A>               TYA                    (N,Z)");
             Console.WriteLine();
         }
+        return "TRANSFER VALUE TO " + (registerIndex == 0 ? "REGISTER" : "ACCUMULATOR" );
     }
 
     // Render status and keybinds for all MAIN substates
     private void RenderMainSubState()
     {
+        string footerTitle = "";
+
         switch (mainSubState)
         {
-            case MAIN_SUB_STATE.DEFAULT:
+            case MAIN_SUB_STATE.DEFAULT or MAIN_SUB_STATE.QUIT:
                 RenderMainSubStateDefault();
                 break;
             case MAIN_SUB_STATE.ADD:
-                RenderMainSubStateAdd();
+                footerTitle = RenderMainSubStateAdd();
                 break;
             case MAIN_SUB_STATE.SUBTRACT:
-                RenderMainSubStateSubtract();
+                footerTitle = RenderMainSubStateSubtract();
                 break;
             case MAIN_SUB_STATE.STORE:
-                RenderMainSubStateStore();
+                footerTitle = RenderMainSubStateStore();
                 break;
             case MAIN_SUB_STATE.LOAD:
-                RenderMainSubStateLoad();
+                footerTitle = RenderMainSubStateLoad();
                 break;
             case MAIN_SUB_STATE.TRANSFER:
-                RenderMainSubStateTransfer();
+                footerTitle = RenderMainSubStateTransfer();
+                break;
+            case MAIN_SUB_STATE.LOGICAL:
+                footerTitle = RenderMainSubStateLogical();
+                break;
+            case MAIN_SUB_STATE.AND:
+                footerTitle = RenderMainSubStateAnd();
+                break;
+            case MAIN_SUB_STATE.EOR:
+                footerTitle = RenderMainSubStateEor();
+                break;
+            case MAIN_SUB_STATE.ORA:
+                footerTitle = RenderMainSubStateOra();
                 break;
         }
 
@@ -1234,8 +1497,11 @@
         
         // Footer
         Console.WriteLine(Lines.seperator[0]);
+        //if (mainSubState == MAIN_SUB_STATE.DEFAULT) { Console.WriteLine(" " + (COLORS.BG_DARK_WHITE + COLORS.FG_BLACK + " MAIN " + COLORS.DEFAULT).PadRight(40,' ') + " PRESS <ESC> TO QUIT PROGRAM"); }
         if (mainSubState == MAIN_SUB_STATE.DEFAULT) { Console.WriteLine(" PRESS <ESC> TO QUIT PROGRAM"); }
-        else { Console.WriteLine(" PRESS <ESC> TO RETURN TO NORMAL MODE"); }
+        else if (mainSubState == MAIN_SUB_STATE.QUIT) { Console.WriteLine(" " + COLORS.BG_DARK_RED + COLORS.FG_BLACK + " ARE YOU SURE YOU WANT TO QUIT? Y/N " + COLORS.DEFAULT); }
+        else { Console.WriteLine(" " + (COLORS.BG_DARK_GREEN + COLORS.FG_BLACK + " " + footerTitle +" " + COLORS.DEFAULT).PadRight(47,' ') + " PRESS <ESC> TO CANCEL"); }
+        //Console.WriteLine(" " + COLORS.BG_DARK_GREEN + COLORS.FG_BLACK + " NORMAL " + COLORS.DEFAULT);
 
     }
 
@@ -1274,8 +1540,11 @@
         }
         Console.WriteLine(memoryLine1);
         Console.WriteLine(memoryLine2);
-        Console.WriteLine(Lines.seperator[0]);
+        //Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine();
+        Console.WriteLine(COLORS.BG_DARK_WHITE + COLORS.FG_BLACK + (" BINARY VALUE:").PadRight(RENDER_WIDTH,' ') + COLORS.DEFAULT);
 
+        Console.WriteLine();
         // Iterate through the x and y coords of the "pixels" and display the digits from the selected register
         for (int y = 0; y < CHAR_HEIGHT; y++)
         {
@@ -1303,29 +1572,35 @@
             // Render the results of the current row
             Console.WriteLine(display[y]);
         }
+        Console.WriteLine();
 
         // Decimal values
-        Console.WriteLine(Lines.seperator[0]);
+        //Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine(COLORS.BG_DARK_WHITE + COLORS.FG_BLACK + (" DECIMAL VALUE:").PadRight(RENDER_WIDTH,' ') + COLORS.DEFAULT);
         Console.WriteLine(" UNSIGNED VALUE:     " + (registers[registerIndex].ToString()).PadLeft(3,' ') + "        SIGNED VALUE:      " + (((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString()).PadLeft(4,' '));
         //Console.WriteLine(" ASCII CHARACTER:  " + (registers[registerIndex] > 32 ? (char)registers[registerIndex] : "-"));
 
-        Console.WriteLine(Lines.seperator[0]);
+        //Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine(COLORS.BG_DARK_WHITE + COLORS.FG_BLACK + (" FLAGS:").PadRight(RENDER_WIDTH,' ') + COLORS.DEFAULT);
         
         // Flags
-        string carryFlagString = " (C) CARRY FLAG:       " + COLORS.FG_BLACK + (carryFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
-        string zeroFlagString = "        (Z) ZERO FLAG:        " + COLORS.FG_BLACK + (zeroFlag ? COLORS.BG_BRIGHT_GREEN + "1"  : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
-        string negativeFlagString = " (N) NEGATIVE FLAG:    " + COLORS.FG_BLACK + (negativeFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
-        string overFlowFlagString = "        (V) OVERFLOW FLAG:    " + COLORS.FG_BLACK + (overflowFlag ? COLORS.BG_BRIGHT_GREEN + "1" : COLORS.BG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string carryFlagString = " (C) CARRY FLAG:       " + (carryFlag ? COLORS.FG_BRIGHT_GREEN + "1" : COLORS.FG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string zeroFlagString = "        (Z) ZERO FLAG:        " + (zeroFlag ? COLORS.FG_BRIGHT_GREEN + "1"  : COLORS.FG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string negativeFlagString = " (N) NEGATIVE FLAG:    " + (negativeFlag ? COLORS.FG_BRIGHT_GREEN + "1" : COLORS.FG_BRIGHT_RED + "0") + COLORS.DEFAULT;
+        string overFlowFlagString = "        (V) OVERFLOW FLAG:    " + (overflowFlag ? COLORS.FG_BRIGHT_GREEN + "1" : COLORS.FG_BRIGHT_RED + "0") + COLORS.DEFAULT;
         Console.WriteLine(carryFlagString + zeroFlagString);
         Console.WriteLine(negativeFlagString + overFlowFlagString);
         
-        Console.WriteLine(Lines.seperator[0]);
+        // Message log
+        int messageIndexMax = Math.Max(messages.Count - MESSAGES_NUM, 0);
+        int messageIndexNumDigits = Math.Max(messageIndexMax.ToString().Length, 2);
+        Console.WriteLine(COLORS.BG_DARK_WHITE + COLORS.FG_BLACK + " MESSAGE LOG:" + ("<SHIFT> + <UP> / <DOWN> (" + messageIndex.ToString().PadLeft(messageIndexNumDigits,'0') + "/" + messageIndexMax.ToString().PadLeft(messageIndexNumDigits,'0') + ") ").PadLeft(43,' ') + COLORS.DEFAULT);
        
         // Render message log
         RenderMessages();
         
-        Console.WriteLine(Lines.seperator[0]);
-
+        //Console.WriteLine(Lines.seperator[0]);
+        Console.WriteLine(COLORS.BG_DARK_WHITE + COLORS.FG_BLACK + (" KEY:              ACTION:                    FLAGS:").PadRight(RENDER_WIDTH,' ') + COLORS.DEFAULT);
         // Render status and available keybinds for the current substate
         RenderMainSubState();
     }
@@ -1437,6 +1712,7 @@
     public BinaryCalc()
     {
         Init();
+        Run();
     }
 }
 
