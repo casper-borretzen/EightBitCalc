@@ -342,27 +342,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 // CORE METHODS:
 ///////////////////////////////////////////////////////////////////////////////
-
+    
     // Check console window size in rows and columns
     private void CheckWindowSize()
     {
-        if (Console.WindowWidth != windowWidth || Console.WindowHeight != windowHeight)
+        if ((windowWidth = Console.WindowWidth) < RENDER_WIDTH+1 || (windowHeight = Console.WindowHeight) < RENDER_HEIGHT+1)
         {
-            // Update the window size vars
-            windowWidth = Console.WindowWidth;
-            windowHeight = Console.WindowHeight;
-
-            // Check if the window is too small
-            if (windowWidth < RENDER_WIDTH || windowHeight < RENDER_HEIGHT)
-            {
-                ChangeState(STATE.ERROR);
-                appError["windowSize"] = true;
-            }
-            else 
-            {
-                ChangeState(appStatePrev);
-                appError["windowSize"] = false;
-            }
+            if (appState != STATE.ERROR) { ChangeState(STATE.ERROR); }
+            appError["windowSize"] = true;
+        }
+        else if (appState == STATE.ERROR)
+        {
+            ChangeState(appStatePrev);
+            appError["windowSize"] = false;
         }
     }
 
