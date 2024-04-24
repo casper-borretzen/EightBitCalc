@@ -13,3 +13,5 @@ Made with the intention of being a learning tool for understanding binary operat
 ![screenshot](screenshots/screenshot_02.png?raw=true "screenshot")
 
 ![screenshot](screenshots/screenshot_03.png?raw=true "screenshot")
+
+![screenshot](screenshots/screenshot_04.png?raw=true "screenshot")
