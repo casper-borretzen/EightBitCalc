@@ -51,12 +51,6 @@ public class ContainerToggle : Container
         return true;
     }
     
-    // Render the container header
-    protected override void RenderHeader(){
-        Console.WriteLine(" " + BinaryCalc.COLOR_BG_BRIGHT_MAGENTA + BinaryCalc.COLOR_FG_BLACK + (" " + base.title + " " + BinaryCalc.COLOR_DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
-        Console.WriteLine(BinaryCalc.seperator[0]);
-    }
-    
     // Render the content the container
     protected override void RenderContent()
     {
@@ -64,11 +58,16 @@ public class ContainerToggle : Container
         {
             if (i < base.contentSize)
             {
-                Console.WriteLine(" " + (i == selPos ? "<" : " ") + " [" + (content.ElementAt(i).Value.enabled == true ? "X" : "-") + "] " + (i == selPos ? ">" : " ") + " " + content.ElementAt(i).Value.description);
+                Console.Write(" " + 
+                    (i == selPos ? "<" : " ") + 
+                    " [" + (content.ElementAt(i).Value.enabled == true ? "X" : "-") + "] " + 
+                    (i == selPos ? ">" : " ") + 
+                    " " + content.ElementAt(i).Value.description 
+                    + Environment.NewLine);
             }
 
             // Empty lines
-            else { Console.WriteLine(); }
+            else { Console.Write(Environment.NewLine); }
         }
     }
     

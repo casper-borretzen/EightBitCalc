@@ -38,12 +38,6 @@ public class ContainerScroll : Container
         base.SetScrollMax();
     }
 
-    // Render the container header
-    protected override void RenderHeader(){
-        Console.WriteLine(" " + BinaryCalc.COLOR_BG_BRIGHT_MAGENTA + BinaryCalc.COLOR_FG_BLACK + (" " + base.title + " " + BinaryCalc.COLOR_DEFAULT).PadRight(23,' ') + "<UP> SCROLL UP / <DOWN> SCROLL DOWN");
-        Console.WriteLine(BinaryCalc.seperator[0]);
-    }
-
     // Render the content of a SCROLL type container
     protected override void RenderContent()
     {
@@ -51,21 +45,25 @@ public class ContainerScroll : Container
         {
             if (i < base.contentSize)
             {
-                string line =  content[i]; 
             
                 // Show line number if enabled
                 if (showLineNum)
                 {
                     int lineNumDigits = (base.contentSize).ToString().Length;
-                    line = " " + BinaryCalc.COLOR_BG_BRIGHT_BLACK + BinaryCalc.COLOR_FG_DARK_WHITE + " " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " " + BinaryCalc.COLOR_DEFAULT + " " + line;
+                    Console.Write(" ");
+                    Console.ForegroundColor = BinaryCalc.COLOR_CONTAINER_LINENUM_FG;
+                    Console.BackgroundColor = BinaryCalc.COLOR_CONTAINER_LINENUM_BG;
+                    Console.Write(" " + ((i+1).ToString()).PadLeft((lineNumDigits > 3 ? lineNumDigits : 3),' ') + " ");
+                    Console.ResetColor();
+                    Console.Write(" ");
                 }
 
                 // Render content
-                Console.WriteLine(line);
+                Console.Write(content[i] + Environment.NewLine);
             }
 
             // Empty lines
-            else { Console.WriteLine(); }
+            else { Console.Write(Environment.NewLine); }
         }
     }
     

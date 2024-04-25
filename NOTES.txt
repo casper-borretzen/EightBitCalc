@@ -10,3 +10,13 @@
 
  - Console color codes:
    https://ss64.com/nt/syntax-ansi.html
+
+ - Build command (windows): dotnet publish -r win-x64 -p:PublishSingleFile=true --self-contained true
+
+ - Build command (linux):   dotnet publish -r linux-x64 -p:PublishSingleFile=true --self-contained true
+
+ - Other well-known RIDs:
+   + win-x86
+   + linux-arm
+   + linux-arm64
+   + osx-x64

@@ -13,6 +13,7 @@ v8.0.0
  - Made keyinput descriptions dynamic
  - Added more text to the HELP screen
  - Fixed a number of typos and various small errors
+ - Made several changes to make the application run better in windows
 
 v7.0.0
  - Added more substates: TRANSFER, STORE and LOAD

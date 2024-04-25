@@ -1,5 +1,10 @@
-﻿class BinaryCalc
+﻿using System.Drawing;
+
+class BinaryCalc
 {
+    // Build consts
+    public const bool WIN_BUILD = false;  // Set to true if building for Windows
+
     // Main application state
     private enum STATE 
     {
@@ -26,7 +31,7 @@
         QUIT
     };
 
-    // Different input modes
+    // Keyboard input modes in MAIN state
     private enum INPUT_MODE
     {
         NORMAL,
@@ -36,50 +41,72 @@
         NUMERICAL_HEX
     };
 
-    // Different byte types
-    private enum BYTE_TYPE 
+    // Byte reference type
+    private enum BYTE_TYPE
     {
         BINARY,
         DECIMAL,
         HEX,
         ADDRESS
     };
-    
+
     // Set color constants
-    public const string COLOR_DEFAULT           = "\x1B[0m";
-    public const string COLOR_UL                = "\x1B[4m";
-    public const string COLOR_FG_BLACK          = "\x1B[30m";
-    public const string COLOR_FG_WHITE          = "\x1B[97m";
-    public const string COLOR_FG_DARK_RED       = "\x1B[31m";
-    public const string COLOR_FG_DARK_GREEN     = "\x1B[32m";
-    public const string COLOR_FG_DARK_YELLOW    = "\x1B[33m";
-    public const string COLOR_FG_DARK_BLUE      = "\x1B[34m";
-    public const string COLOR_FG_DARK_MAGENTA   = "\x1B[35m";
-    public const string COLOR_FG_DARK_CYAN      = "\x1B[36m";
-    public const string COLOR_FG_DARK_WHITE     = "\x1B[37m";
-    public const string COLOR_FG_BRIGHT_BLACK   = "\x1B[90m";
-    public const string COLOR_FG_BRIGHT_RED     = "\x1B[91m";
-    public const string COLOR_FG_BRIGHT_GREEN   = "\x1B[92m";
-    public const string COLOR_FG_BRIGHT_YELLOW  = "\x1B[93m";
-    public const string COLOR_FG_BRIGHT_BLUE    = "\x1B[94m";
-    public const string COLOR_FG_BRIGHT_MAGENTA = "\x1B[95m";
-    public const string COLOR_FG_BRIGHT_CYAN    = "\x1B[96m";
-    public const string COLOR_BG_BLACK          = "\x1B[40m";
-    public const string COLOR_BG_WHITE          = "\x1B[107m";
-    public const string COLOR_BG_DARK_RED       = "\x1B[41m";
-    public const string COLOR_BG_DARK_GREEN     = "\x1B[42m";
-    public const string COLOR_BG_DARK_YELLOW    = "\x1B[43m";
-    public const string COLOR_BG_DARK_BLUE      = "\x1B[44m";
-    public const string COLOR_BG_DARK_MAGENTA   = "\x1B[45m";
-    public const string COLOR_BG_DARK_CYAN      = "\x1B[46m";
-    public const string COLOR_BG_DARK_WHITE     = "\x1B[47m";
-    public const string COLOR_BG_BRIGHT_BLACK   = "\x1B[100m";
-    public const string COLOR_BG_BRIGHT_RED     = "\x1B[101m";
-    public const string COLOR_BG_BRIGHT_GREEN   = "\x1B[102m";
-    public const string COLOR_BG_BRIGHT_YELLOW  = "\x1B[103m";
-    public const string COLOR_BG_BRIGHT_BLUE    = "\x1B[104m";
-    public const string COLOR_BG_BRIGHT_MAGENTA = "\x1B[105m";
-    public const string COLOR_BG_BRIGHT_CYAN    = "\x1B[106m";
+    public const ConsoleColor COLOR_TITLEBAR_MAIN_FG      = ConsoleColor.Black;
+    public const ConsoleColor COLOR_TITLEBAR_MAIN_BG      = ConsoleColor.Cyan;
+    public const ConsoleColor COLOR_TITLEBAR_FG           = ConsoleColor.Black;
+    public const ConsoleColor COLOR_TITLEBAR_BG           = ConsoleColor.Gray;
+    public const ConsoleColor COLOR_INACTIVE_FG           = ConsoleColor.DarkGray;
+    public const ConsoleColor COLOR_QUIT_PROMPT_FG        = ConsoleColor.Black;
+    public const ConsoleColor COLOR_QUIT_PROMPT_BG        = ConsoleColor.DarkRed;
+    public const ConsoleColor COLOR_SUB_STATE_FG          = ConsoleColor.Black;
+    public const ConsoleColor COLOR_SUB_STATE_BG          = ConsoleColor.DarkGreen;
+    public const ConsoleColor COLOR_REGISTER_ACTIVE_FG    = ConsoleColor.Black;
+    public const ConsoleColor COLOR_REGISTER_ACTIVE_BG    = ConsoleColor.Yellow;
+    public const ConsoleColor COLOR_REGISTER_INACTIVE_FG  = ConsoleColor.Black;
+    public const ConsoleColor COLOR_REGISTER_INACTIVE_BG  = ConsoleColor.Gray;
+    public const ConsoleColor COLOR_BIT_HL_FG             = ConsoleColor.Yellow;
+    public const ConsoleColor COLOR_FLAG_SET_FG           = ConsoleColor.DarkGreen;
+    public const ConsoleColor COLOR_FLAG_UNSET_FG         = ConsoleColor.DarkRed;
+    public const ConsoleColor COLOR_CONTAINER_HEADER_FG   = ConsoleColor.Black;
+    public const ConsoleColor COLOR_CONTAINER_HEADER_BG   = ConsoleColor.Magenta;
+    public const ConsoleColor COLOR_CONTAINER_LINENUM_FG  = ConsoleColor.Gray;
+    public const ConsoleColor COLOR_CONTAINER_LINENUM_BG  = ConsoleColor.DarkGray;
+    
+    // Set ANSI color constants
+    public const string COLOR_ANSI_DEFAULT                = (WIN_BUILD ? "" : "\x1B[0m");
+    public const string COLOR_ANSI_UL                     = (WIN_BUILD ? "" : "\x1B[4m");
+    public const string COLOR_ANSI_FG_BLACK               = (WIN_BUILD ? "" : "\x1B[30m");
+    public const string COLOR_ANSI_FG_WHITE               = (WIN_BUILD ? "" : "\x1B[97m");
+    public const string COLOR_ANSI_FG_DARK_RED            = (WIN_BUILD ? "" : "\x1B[31m");
+    public const string COLOR_ANSI_FG_DARK_GREEN          = (WIN_BUILD ? "" : "\x1B[32m");
+    public const string COLOR_ANSI_FG_DARK_YELLOW         = (WIN_BUILD ? "" : "\x1B[33m");
+    public const string COLOR_ANSI_FG_DARK_BLUE           = (WIN_BUILD ? "" : "\x1B[34m");
+    public const string COLOR_ANSI_FG_DARK_MAGENTA        = (WIN_BUILD ? "" : "\x1B[35m");
+    public const string COLOR_ANSI_FG_DARK_CYAN           = (WIN_BUILD ? "" : "\x1B[36m");
+    public const string COLOR_ANSI_FG_DARK_WHITE          = (WIN_BUILD ? "" : "\x1B[37m");
+    public const string COLOR_ANSI_FG_BRIGHT_BLACK        = (WIN_BUILD ? "" : "\x1B[90m");
+    public const string COLOR_ANSI_FG_BRIGHT_RED          = (WIN_BUILD ? "" : "\x1B[91m");
+    public const string COLOR_ANSI_FG_BRIGHT_GREEN        = (WIN_BUILD ? "" : "\x1B[92m");
+    public const string COLOR_ANSI_FG_BRIGHT_YELLOW       = (WIN_BUILD ? "" : "\x1B[93m");
+    public const string COLOR_ANSI_FG_BRIGHT_BLUE         = (WIN_BUILD ? "" : "\x1B[94m");
+    public const string COLOR_ANSI_FG_BRIGHT_MAGENTA      = (WIN_BUILD ? "" : "\x1B[95m");
+    public const string COLOR_ANSI_FG_BRIGHT_CYAN         = (WIN_BUILD ? "" : "\x1B[96m");
+    public const string COLOR_ANSI_BG_BLACK               = (WIN_BUILD ? "" : "\x1B[40m");
+    public const string COLOR_ANSI_BG_WHITE               = (WIN_BUILD ? "" : "\x1B[107m");
+    public const string COLOR_ANSI_BG_DARK_RED            = (WIN_BUILD ? "" : "\x1B[41m");
+    public const string COLOR_ANSI_BG_DARK_GREEN          = (WIN_BUILD ? "" : "\x1B[42m");
+    public const string COLOR_ANSI_BG_DARK_YELLOW         = (WIN_BUILD ? "" : "\x1B[43m");
+    public const string COLOR_ANSI_BG_DARK_BLUE           = (WIN_BUILD ? "" : "\x1B[44m");
+    public const string COLOR_ANSI_BG_DARK_MAGENTA        = (WIN_BUILD ? "" : "\x1B[45m");
+    public const string COLOR_ANSI_BG_DARK_CYAN           = (WIN_BUILD ? "" : "\x1B[46m");
+    public const string COLOR_ANSI_BG_DARK_WHITE          = (WIN_BUILD ? "" : "\x1B[47m");
+    public const string COLOR_ANSI_BG_BRIGHT_BLACK        = (WIN_BUILD ? "" : "\x1B[100m");
+    public const string COLOR_ANSI_BG_BRIGHT_RED          = (WIN_BUILD ? "" : "\x1B[101m");
+    public const string COLOR_ANSI_BG_BRIGHT_GREEN        = (WIN_BUILD ? "" : "\x1B[102m");
+    public const string COLOR_ANSI_BG_BRIGHT_YELLOW       = (WIN_BUILD ? "" : "\x1B[103m");
+    public const string COLOR_ANSI_BG_BRIGHT_BLUE         = (WIN_BUILD ? "" : "\x1B[104m");
+    public const string COLOR_ANSI_BG_BRIGHT_MAGENTA      = (WIN_BUILD ? "" : "\x1B[105m");
+    public const string COLOR_ANSI_BG_BRIGHT_CYAN         = (WIN_BUILD ? "" : "\x1B[106m");
 
     // Set class constants
     private const string MAIN_TITLE     = "8-BIT BINARY CALCULATOR";
@@ -92,12 +119,12 @@
     private const int CHAR_HEIGHT       = 7;
     private const int CHAR_WIDTH        = 5 + CHAR_SPACING;
     private const int CHAR_LIMIT        = 8;
-    private const int RENDER_WIDTH      = CHAR_LIMIT * CHAR_WIDTH;
-    private const int RENDER_HEIGHT     = 52;
     private const int REGISTER_NUM      = 3;
     private const int MEMORY_NUM        = 5;
     private const int MESSAGES_NUM      = 8;
     private const int INPUT_CHAR_LIMIT  = 14;
+    public const int RENDER_WIDTH       = CHAR_LIMIT * CHAR_WIDTH;
+    public const int RENDER_HEIGHT      = 52;
 
     // Set class variables
     private bool running                = true;
@@ -108,7 +135,6 @@
     private MAIN_SUB_STATE mainSubState = MAIN_SUB_STATE.DEFAULT;
     private INPUT_MODE inputMode        = INPUT_MODE.NORMAL;
     private bool[,,] digits             = new bool[2,CHAR_HEIGHT,CHAR_WIDTH];
-    private string[] display            = new string[CHAR_HEIGHT];
     private byte[] registers            = new byte[REGISTER_NUM];
     private byte[] registersPrev        = new byte[REGISTER_NUM];
     private byte[] memory               = new byte[MEMORY_NUM];
@@ -143,7 +169,8 @@
     private Dictionary<string, Setting> settings = new Dictionary<string, Setting>
     {
         { "uiHlChangedBit", new Setting(true,  "HIGHLIGHT BITS CHANGED IN PREVIOUS OPERATION") },
-        { "flagsAutoCarry", new Setting(false, "AUTOMATICALLY SET/UNSET CARRY FLAG") }
+        { "flagsAutoCarry", new Setting(false, "AUTOMATICALLY SET/UNSET CARRY FLAG") },
+        { "modKeyCtrl", new Setting((WIN_BUILD ? true : false), "USE CONTROL INSTEAD OF SHIFT AS MODIFIER KEY") }
     }; 
     
     // Create scroll containers
@@ -165,32 +192,32 @@
             "",
             " APPLICATION VERSION " + VERSION_MAJOR.ToString() + "." + VERSION_MINOR.ToString() + "." + VERSION_PATCH.ToString(),
             "",
-            " " + COLOR_UL + "ASSEMBLY LOG:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "ASSEMBLY LOG:" + COLOR_ANSI_DEFAULT,
             " THE ASSEMBLY LOG IS AUTOMATICALLY SAVED",
             " TO LOG.ASM WHEN QUITTING.",
             "",
-            " " + COLOR_UL + "MEMORY:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "MEMORY:" + COLOR_ANSI_DEFAULT,
             " THERE ARE 5 BYTES OF MEMORY AVAILABLE",
             " IN THE ADDRESS RANGE $00 - $04.",
             "",
-            " " + COLOR_UL + "FLAGS:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "FLAGS:" + COLOR_ANSI_DEFAULT,
             " FOUR FLAGS ARE IMPLEMENTED.",
             " FLAGS ARE SET AFTER PERFORMING OPERATIONS.",
             " FLAGS ARE INDICATED BY PARANTHESIS.",
             "",
-            " " + COLOR_UL + "(C) CARRY FLAG:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "(C) CARRY FLAG:" + COLOR_ANSI_DEFAULT,
             " FUNCTIONALITY DIFFERS DEPENDING ON OPERATION.",
             "",
-            " " + COLOR_UL + "(Z) ZERO FLAG:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "(Z) ZERO FLAG:" + COLOR_ANSI_DEFAULT,
             " IS SET TO 1 IF THE RESULT IS ZERO.",
             "",
-            " " + COLOR_UL + "(O) OVERFLOW FLAG:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "(O) OVERFLOW FLAG:" + COLOR_ANSI_DEFAULT,
             " FUNCTIONALITY DIFFERS DEPENDING ON OPERATION.",
             "",
-            " " + COLOR_UL + "(N) NEGATIVE FLAG:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "(N) NEGATIVE FLAG:" + COLOR_ANSI_DEFAULT,
             " IS SET TO 1 IF BIT 7 IS 1.",
             "",
-            " " + COLOR_UL + "ACCUMULATOR AND REGISTERS:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "ACCUMULATOR AND REGISTERS:" + COLOR_ANSI_DEFAULT,
             " THE ACCUMULATOR [A] AND THE REGISTERS [X] AND [Y]",
             " EACH HOLDS ONE BYTE OF DATA.",
             " ARITHMETIC OPERATIONS ARE AVAILABLE ON THE",
@@ -200,7 +227,7 @@
             " ACCUMULATOR AND REGISTERS ARE INDICATED",
             " BY SQUARE BRACKETS.",
             "",
-            " " + COLOR_UL + "LOADING / STORING MODES:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "LOADING / STORING MODES:" + COLOR_ANSI_DEFAULT,
             " IMMEDIATE MODE:            LDA #20",
             " LOADS [A] WITH THE LITERAL DECIMAL VALUE 20.",
             " ",
@@ -210,7 +237,7 @@
             " IMMEDIATE MODE:            LDA #$20",
             " LOADS [A] WITH THE LITERAL HEXADECIMAL NUMBER 20.",
             "",
-            " " + COLOR_UL + "BASE-2 (BINARY) TO BASE-10 (DECIMAL):" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "BASE-2 (BINARY) TO BASE-10 (DECIMAL):" + COLOR_ANSI_DEFAULT,
             "  128's  64's  32's  16's   8's   4's   2's   1's",
             "    |     |     |     |     |     |     |     |",
             "    0     0     0     0     0     1     1     1  =  7",
@@ -218,7 +245,7 @@
             "    1     0     0     0     0     0     0     1  =  128",
             "    1     1     1     1     1     1     1     1  =  255",
             "",
-            " " + COLOR_UL + "NEGATIVE NUMBERS USING TWO\'S COMPLIMENT:" + COLOR_DEFAULT,
+            " " + COLOR_ANSI_UL + "NEGATIVE NUMBERS USING TWO\'S COMPLIMENT:" + COLOR_ANSI_DEFAULT,
             " -128's  64's  32's  16's   8's   4's   2's   1's",
             "    |     |     |     |     |     |     |     |",
             "    0     0     0     0     0     1     1     1  =  7",
@@ -228,37 +255,37 @@
             "",
             seperator[1],
             "",
-            " " + COLOR_UL + "LDA: LOAD ACCUMULATOR" + COLOR_DEFAULT + "                        (N,Z)",
+            " " + COLOR_ANSI_UL + "LDA: LOAD ACCUMULATOR" + COLOR_ANSI_DEFAULT + "                        (N,Z)",
             " LOAD A BYTE OF DATA INTO THE ACCUMULATOR.",
             "",
-            " " + COLOR_UL + "LDX: LOAD X REGISTER" + COLOR_DEFAULT + "                         (N,Z)",
+            " " + COLOR_ANSI_UL + "LDX: LOAD X REGISTER" + COLOR_ANSI_DEFAULT + "                         (N,Z)",
             " LOAD A BYTE OF DATA INTO THE X REGISTER.",
             "",
-            " " + COLOR_UL + "LDX: LOAD Y REGISTER" + COLOR_DEFAULT + "                         (N,Z)",
+            " " + COLOR_ANSI_UL + "LDX: LOAD Y REGISTER" + COLOR_ANSI_DEFAULT + "                         (N,Z)",
             " LOAD A BYTE OF DATA INTO THE Y REGISTER.",
             "",
-            " " + COLOR_UL + "STA: STORE ACCUMULATOR" + COLOR_DEFAULT + "                       (N,Z)",
+            " " + COLOR_ANSI_UL + "STA: STORE ACCUMULATOR" + COLOR_ANSI_DEFAULT + "                       (N,Z)",
             " STORE THE CONTENT OF THE ACCUMULATOR INTO MEMORY.",
             "",
-            " " + COLOR_UL + "STX: STORE X REGISTER" + COLOR_DEFAULT + "                        (N,Z)",
+            " " + COLOR_ANSI_UL + "STX: STORE X REGISTER" + COLOR_ANSI_DEFAULT + "                        (N,Z)",
             " STORE THE CONTENT OF THE X REGISTER INTO MEMORY.",
             "",
-            " " + COLOR_UL + "STY: STORE Y REGISTER" + COLOR_DEFAULT + "                        (N,Z)",
+            " " + COLOR_ANSI_UL + "STY: STORE Y REGISTER" + COLOR_ANSI_DEFAULT + "                        (N,Z)",
             " STORE THE CONTENT OF THE Y REGISTER INTO MEMORY.",
             "",
-            " " + COLOR_UL + "TAX: TRANSFER ACCUMULATOR TO X" + COLOR_DEFAULT + "               (N,Z)",
+            " " + COLOR_ANSI_UL + "TAX: TRANSFER ACCUMULATOR TO X" + COLOR_ANSI_DEFAULT + "               (N,Z)",
             " COPIES THE DATA FROM [A] TO [X].",
             "",
-            " " + COLOR_UL + "TAY: TRANSFER ACCUMULATOR TO Y" + COLOR_DEFAULT + "               (N,Z)",
+            " " + COLOR_ANSI_UL + "TAY: TRANSFER ACCUMULATOR TO Y" + COLOR_ANSI_DEFAULT + "               (N,Z)",
             " COPIES THE DATA FROM [A] TO [Y].",
             "",
-            " " + COLOR_UL + "TXA: TRANSFER X TO ACCUMULATOR" + COLOR_DEFAULT + "               (N,Z)",
+            " " + COLOR_ANSI_UL + "TXA: TRANSFER X TO ACCUMULATOR" + COLOR_ANSI_DEFAULT + "               (N,Z)",
             " COPIES THE DATA FROM [X] TO [A].",
             "",
-            " " + COLOR_UL + "TYA: TRANSFER Y TO ACCUMULATOR" + COLOR_DEFAULT + "               (N,Z)",
+            " " + COLOR_ANSI_UL + "TYA: TRANSFER Y TO ACCUMULATOR" + COLOR_ANSI_DEFAULT + "               (N,Z)",
             " COPIES THE DATA FROM [Y] TO [A].",
             "",
-            " " + COLOR_UL + "AND: LOGICAL AND" + COLOR_DEFAULT + "                             (N,Z)",
+            " " + COLOR_ANSI_UL + "AND: LOGICAL AND" + COLOR_ANSI_DEFAULT + "                             (N,Z)",
             " THE RESULT OF A LOGICAL AND IS ONLY TRUE",
             " IF BOTH INPUTS ARE TRUE.",
             " CAN BE USED TO MASK BITS.",
@@ -266,25 +293,25 @@
             " CAN BE USED TO CHECK IF A NUMBER IS",
             " DIVISIBLE BY 2/4/6/8 ETC.",
             "",
-            " " + COLOR_UL + "EOR: EXCLUSIVE OR" + COLOR_DEFAULT + "                            (N,Z)",
+            " " + COLOR_ANSI_UL + "EOR: EXCLUSIVE OR" + COLOR_ANSI_DEFAULT + "                            (N,Z)",
             " AN EXCLUSIVE OR IS SIMILAR TO LOGICAL OR, WITH THE",
             " EXCEPTION THAT IS IS FALSE WHEN BOTH INPUTS ARE TRUE.",
             " EOR CAN BE USED TO FLIP BITS.",
             "",
-            " " + COLOR_UL + "ORA: LOGICAL INCLUSIVE OR" + COLOR_DEFAULT + "                    (N,Z)",
+            " " + COLOR_ANSI_UL + "ORA: LOGICAL INCLUSIVE OR" + COLOR_ANSI_DEFAULT + "                    (N,Z)",
             " THE RESULT OF A LOGICAL INCLUSIVE OR IS TRUE IF",
             " AT LEAST ONE OF THE INPUTS ARE TRUE.",
             " ORA CAN BE USED TO SET A PARTICULAR BIT TO TRUE.",
             " ORA + EOR CAN BE USED TO SET A BIT TO FALSE.",
             "",
-            " " + COLOR_UL + "ADC: ADD WITH CARRY" + COLOR_DEFAULT + "                          (N,V,Z,C)",
+            " " + COLOR_ANSI_UL + "ADC: ADD WITH CARRY" + COLOR_ANSI_DEFAULT + "                          (N,V,Z,C)",
             " ADDS A VALUE TOGETHER WITH THE CARRY BIT TO [A].",
             " THE (C) FLAG IS SET IF THE RESULTING VALUE",
             " IS ABOVE 255 (UNSIGNED).", 
             " THE (V) FLAG IS SET IF ADDING TO A POSITIVE",
             " NUMBER AND ENDING UP WITH A NEGATIVE NUMBER.",
             "",
-            " " + COLOR_UL + "SBC: SUBTRACT WITH CARRY" + COLOR_DEFAULT + "                     (N,V,Z,C)",
+            " " + COLOR_ANSI_UL + "SBC: SUBTRACT WITH CARRY" + COLOR_ANSI_DEFAULT + "                     (N,V,Z,C)",
             " SUBTRACTS A VALUE TOGETHER WITH THE",
             " NOT OF THE CARRY BIT TO [A].",
             " THE (C) FLAG IS CLEAR IF THE RESULTING VALUE",
@@ -292,47 +319,47 @@
             " THE (V) FLAG IS SET IF SUBTRACTING FROM A NEGATIVE",
             " NUMBER AND ENDING UP WITH A POSITIVE NUMBER.",
             "",
-            " " + COLOR_UL + "INX: INCREMENT X REGISTER" + COLOR_DEFAULT + "                    (N,Z)",
+            " " + COLOR_ANSI_UL + "INX: INCREMENT X REGISTER" + COLOR_ANSI_DEFAULT + "                    (N,Z)",
             " ADDS ONE TO THE VALUE OF THE X REGISTER.",
             "",
-            " " + COLOR_UL + "INY: INCREMENT Y REGISTER" + COLOR_DEFAULT + "                    (N,Z)",
+            " " + COLOR_ANSI_UL + "INY: INCREMENT Y REGISTER" + COLOR_ANSI_DEFAULT + "                    (N,Z)",
             " ADDS ONE TO THE VALUE OF THE Y REGISTER.",
             "",
-            " " + COLOR_UL + "DEX: DECREMENT X REGISTER" + COLOR_DEFAULT + "                    (N,Z)",
+            " " + COLOR_ANSI_UL + "DEX: DECREMENT X REGISTER" + COLOR_ANSI_DEFAULT + "                    (N,Z)",
             " SUBTRACTS ONE FROM THE VALUE OF THE X REGISTER.",
             "",
-            " " + COLOR_UL + "DEY: DECREMENT Y REGISTER" + COLOR_DEFAULT + "                    (N,Z)",
+            " " + COLOR_ANSI_UL + "DEY: DECREMENT Y REGISTER" + COLOR_ANSI_DEFAULT + "                    (N,Z)",
             " SUBTRACTS ONE FROM THE VALUE OF THE Y REGISTER.",
             "",
-            " " + COLOR_UL + "ASL: ARITHMETIC SHIFT LEFT" + COLOR_DEFAULT + "                   (N,Z,C)",
+            " " + COLOR_ANSI_UL + "ASL: ARITHMETIC SHIFT LEFT" + COLOR_ANSI_DEFAULT + "                   (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE LEFT",
             " INSERTING A 0 IN THE RIGHTMOST BIT",
             " AND MOVING THE LEFTMOST BIT TO THE (C) FLAG.",
             " THIS OPERATION IS EQUIVALENT TO MULTIPLYING BY 2.",
             "",
-            " " + COLOR_UL + "LSR: LOGICAL SHIFT RIGHT" + COLOR_DEFAULT + "                     (N,Z,C)",
+            " " + COLOR_ANSI_UL + "LSR: LOGICAL SHIFT RIGHT" + COLOR_ANSI_DEFAULT + "                     (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE RIGHT",
             " INSERTING A 0 IN THE LEFTMOST BIT",
             " AND MOVING THE RIGHTMOST BIT TO THE (C) FLAG.",
             " THIS OPERATION IS EQUIVALENT TO DIVIDING BY 2.",
             "",
-            " " + COLOR_UL + "ROL: ROTATE LEFT" + COLOR_DEFAULT + "                             (N,Z,C)",
+            " " + COLOR_ANSI_UL + "ROL: ROTATE LEFT" + COLOR_ANSI_DEFAULT + "                             (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE LEFT",
             " THE LEFTMOST BIT MOVES OVER TO THE RIGHTMOST SIDE.",
             "",
-            " " + COLOR_UL + "ROR: ROTATE RIGHT" + COLOR_DEFAULT + "                            (N,Z,C)",
+            " " + COLOR_ANSI_UL + "ROR: ROTATE RIGHT" + COLOR_ANSI_DEFAULT + "                            (N,Z,C)",
             " MOVES ALL BITS ONE STEP TO THE RIGHT",
             " THE RIGHTMOST BIT MOVES OVER TO THE LEFTMOST SIDE.",
             "",
-            " " + COLOR_UL + "CLC: CLEAR CARRY FLAG" + COLOR_DEFAULT + "                        (N,Z,C)",
+            " " + COLOR_ANSI_UL + "CLC: CLEAR CARRY FLAG" + COLOR_ANSI_DEFAULT + "                        (N,Z,C)",
             " SETS THE (C) FLAG TO 0.",
             " USUALLY PERFORMED BEFORE ADDITION.",
             "",
-            " " + COLOR_UL + "SEC: SET CARRY FLAG" + COLOR_DEFAULT + "                          (N,Z,C)",
+            " " + COLOR_ANSI_UL + "SEC: SET CARRY FLAG" + COLOR_ANSI_DEFAULT + "                          (N,Z,C)",
             " SETS THE (C) FLAG TO 1.",
             " USUALLY PERFORMED BEFORE SUBTRACTION.",
             "",
-            " " + COLOR_UL + "CLV: CLEAR OVERFLOW FLAG" + COLOR_DEFAULT + "                     (N,Z,C)",
+            " " + COLOR_ANSI_UL + "CLV: CLEAR OVERFLOW FLAG" + COLOR_ANSI_DEFAULT + "                     (N,Z,C)",
             " SETS THE (V) FLAG TO 0.",
             "",
     };
@@ -343,10 +370,18 @@
 // CORE METHODS:
 ///////////////////////////////////////////////////////////////////////////////
     
+    // Reset console
+    private void ConsoleReset() 
+    {
+        Console.CursorVisible = false;
+        Console.ResetColor();
+        Console.Clear();
+    }
+
     // Check console window size in rows and columns
     private void CheckWindowSize()
     {
-        if ((windowWidth = Console.WindowWidth) < RENDER_WIDTH+1 || (windowHeight = Console.WindowHeight) < RENDER_HEIGHT+1)
+        if ((windowWidth = Console.WindowWidth) < RENDER_WIDTH || (windowHeight = Console.WindowHeight) < RENDER_HEIGHT)
         {
             if (appState != STATE.ERROR) { ChangeState(STATE.ERROR); }
             appError["windowSize"] = true;
@@ -410,7 +445,7 @@
     // Add message to the message log
     public void AddMessage(string line, bool error = false)
     {
-        messages.Add(DateTime.Now.ToString("HH:mm:ss") + " " + (error ? COLOR_FG_DARK_RED + "ERROR:" + COLOR_DEFAULT + " " + line.ToUpper() : line.ToUpper()) );
+        messages.Add(DateTime.Now.ToString("HH:mm:ss") + " " + (error ? COLOR_ANSI_FG_DARK_RED + "ERROR:" + COLOR_ANSI_DEFAULT + " " + line.ToUpper() : line.ToUpper()) );
         messageIndex = 0;
     }
 
@@ -792,150 +827,180 @@
 
 
 
-///////////////////////////////////////////////////////////////////////////////
-// RENDER METHODS:
-///////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
+    // RENDER METHODS:
+    ///////////////////////////////////////////////////////////////////////////////
 
     // Render message log
     public void RenderMessages(int num = MESSAGES_NUM)
     {
         for (int i = num - 1; i >= 0; i--)
         {
-            Console.WriteLine(messages.Count > i + messageIndex ? " " + messages[messages.Count-(i+1+messageIndex)] : " -");
+            Console.Write((messages.Count > i + messageIndex ? " " + messages[messages.Count-(i+1+messageIndex)] : " -") + Environment.NewLine);
         }
     }
 
     // Main titlebar
-    private void RenderTitlebar()
+    private void RenderMainTitlebar()
     {
-        Console.WriteLine();
-        Console.WriteLine(COLOR_FG_BLACK + COLOR_BG_BRIGHT_CYAN + (MAIN_TITLE.PadLeft((RENDER_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(RENDER_WIDTH, ' ') + COLOR_DEFAULT);
+        Console.Write(Environment.NewLine);
+        Console.ForegroundColor = COLOR_TITLEBAR_MAIN_FG;
+        Console.BackgroundColor = COLOR_TITLEBAR_MAIN_BG;
+        Console.Write((MAIN_TITLE.PadLeft((RENDER_WIDTH - MAIN_TITLE.Length) / 2 + MAIN_TITLE.Length, ' ')).PadRight(RENDER_WIDTH, ' ') + Environment.NewLine);
+        Console.ResetColor();
+        Console.Write(Environment.NewLine);
+    }
+
+    // Titlebar
+    private void RenderTitlebar(string title)
+    {
+        Console.ForegroundColor = COLOR_TITLEBAR_FG;
+        Console.BackgroundColor = COLOR_TITLEBAR_BG;
+        Console.Write((" " + title).PadRight(RENDER_WIDTH, ' ') + Environment.NewLine);
+        Console.ResetColor();
     }
 
     // Render status and keybinds for DEFAULT substate
-    private void RenderMainSubStateDefault(string color, string colorEnd)
+    private void RenderMainSubStateDefault()
     {
-        Console.WriteLine(" <A> <X> <Y>       CHANGE ACTIVE REGISTER");
-        Console.WriteLine(" <UP>              " + ((registerIndex == 0) ? "ADC #%0000000" + ((!settings["flagsAutoCarry"].enabled && carryFlag) ? "0" : "1") + "             (N,V,Z,C)"  : "IN" + GetRegisterChar(registerIndex) + ": INCREMENT " + GetRegisterChar(registerIndex) + " REGISTER  (N,Z)"));
-        Console.WriteLine(" <DOWN>            " + ((registerIndex == 0) ? "SBC #%0000000" + ((!settings["flagsAutoCarry"].enabled && !carryFlag) ? "0" : "1") + "             (N,V,Z,C)"  : "IN" + GetRegisterChar(registerIndex) + ": DECREMENT " + GetRegisterChar(registerIndex) + " REGISTER  (N,Z)"));
-        Console.WriteLine(((registerIndex == 0 && inputMode == INPUT_MODE.NORMAL) ? "" : COLOR_FG_BRIGHT_BLACK ) + " <LEFT>            ASL: ARITHMETIC SHIFT LEFT (N,Z,C)");
-        Console.WriteLine(" <RIGHT>           LSR: LOGICAL SHIFT RIGHT   (N,Z,C)");
-        Console.WriteLine(" <SHIFT> + <LEFT>  ROL: ROTATE LEFT           (N,Z,C)");
-        Console.WriteLine(" <SHIFT> + <RIGHT> ROR: ROTATE RIGHT          (N,Z,C)");
-        Console.WriteLine(" <+>               ADC: ADD WITH CARRY        (N,V,Z,C)");
-        Console.WriteLine(" <->               SBC: SUBTRACT WITH CARRY   (N,V,Z,C)");
-        Console.WriteLine(" <&>               LOGICAL OPERATIONS         (N,Z)");
-        Console.WriteLine(((registerIndex == 0 && inputMode == INPUT_MODE.NORMAL) ? "" : COLOR_DEFAULT) + " <S>               " + (registerIndex == 0 ? "STA: STORE ACCUMULATOR" : "ST" + GetRegisterChar(registerIndex) + ": STORE " + GetRegisterChar(registerIndex) + " REGISTER"));
-        Console.WriteLine(" <L>               " + (registerIndex == 0 ? "LDA: LOAD ACCUMULATOR      (N,Z)" : "LD" + GetRegisterChar(registerIndex) + ": LOAD " + GetRegisterChar(registerIndex) + " REGISTER       (N,Z)" ));
-        Console.WriteLine(" <T>               " + (registerIndex == 0 ? "TRANSFER ACCUMULATOR       (N,Z)" : "T" + GetRegisterChar(registerIndex) + "A: TRANSFER " + GetRegisterChar(registerIndex) + " TO A       (N,Z)" ));
-        Console.WriteLine(" <C>               TOGGLE CARRY FLAG");
-        Console.WriteLine(" <V>               CLEAR OVERFLOW FLAG");
-        Console.WriteLine(" <M>               ASSEMBLY LOG");
-        Console.WriteLine(" <P>               PREFERENCES");
-        Console.WriteLine(" <?>               HELP" + colorEnd);
+        Console.Write(" <A> <X> <Y>       CHANGE ACTIVE REGISTER" + Environment.NewLine);
+        Console.Write(" <UP>              " + ((registerIndex == 0) ? 
+            "ADC #%0000000" + ((!settings["flagsAutoCarry"].enabled && carryFlag) ? "0" : "1") + "             (N,V,Z,C)"  : 
+            "IN" + GetRegisterChar(registerIndex) + ": INCREMENT " + GetRegisterChar(registerIndex) + " REGISTER  (N,Z)") + 
+            Environment.NewLine);
+        Console.Write(" <DOWN>            " + ((registerIndex == 0) ? 
+            "SBC #%0000000" + ((!settings["flagsAutoCarry"].enabled && !carryFlag) ? "0" : "1") + "             (N,V,Z,C)"  : 
+            "IN" + GetRegisterChar(registerIndex) + ": DECREMENT " + GetRegisterChar(registerIndex) + " REGISTER  (N,Z)") 
+            + Environment.NewLine);
+        if (registerIndex != 0 && inputMode == INPUT_MODE.NORMAL) { Console.ForegroundColor = COLOR_INACTIVE_FG; }
+        Console.Write(" <LEFT>            ASL: ARITHMETIC SHIFT LEFT (N,Z,C)" + Environment.NewLine);
+        Console.Write(" <RIGHT>           LSR: LOGICAL SHIFT RIGHT   (N,Z,C)" + Environment.NewLine);
+        Console.Write(" " + (settings["modKeyCtrl"].enabled ? "<CTRL> + <LEFT> " : "<SHIFT> + <LEFT>") + "  ROL: ROTATE LEFT           (N,Z,C)" + Environment.NewLine);
+        Console.Write(" " + (settings["modKeyCtrl"].enabled ? "<CTRL> + <RIGHT> " : "<SHIFT> + <RIGHT>") + " ROR: ROTATE RIGHT          (N,Z,C)" + Environment.NewLine);
+        Console.Write(" <+>               ADC: ADD WITH CARRY        (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <->               SBC: SUBTRACT WITH CARRY   (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <&>               LOGICAL OPERATIONS         (N,Z)" + Environment.NewLine);
+        if (registerIndex != 0 && inputMode == INPUT_MODE.NORMAL) { Console.ResetColor(); }
+        Console.Write(" <S>               " + (registerIndex == 0 ? 
+            "STA: STORE ACCUMULATOR" : 
+            "ST" + GetRegisterChar(registerIndex) + ": STORE " + GetRegisterChar(registerIndex) + " REGISTER")
+            + Environment.NewLine);
+        Console.Write(" <L>               " + (registerIndex == 0 ? 
+            "LDA: LOAD ACCUMULATOR      (N,Z)" : 
+            "LD" + GetRegisterChar(registerIndex) + ": LOAD " + GetRegisterChar(registerIndex) + " REGISTER       (N,Z)" )
+            + Environment.NewLine);
+        Console.Write(" <T>               " + (registerIndex == 0 ? 
+            "TRANSFER ACCUMULATOR       (N,Z)" : 
+            "T" + GetRegisterChar(registerIndex) + "A: TRANSFER " + GetRegisterChar(registerIndex) + " TO A       (N,Z)" )
+            + Environment.NewLine);
+        Console.Write(" <C>               TOGGLE CARRY FLAG" + Environment.NewLine);
+        Console.Write(" <V>               CLEAR OVERFLOW FLAG" + Environment.NewLine);
+        Console.Write(" <M>               ASSEMBLY LOG" + Environment.NewLine);
+        Console.Write(" <P>               PREFERENCES" + Environment.NewLine);
+        Console.Write(" <?>               HELP" + Environment.NewLine);
     }
     
     // Render status and keybinds for ADD substate
-    private string RenderMainSubStateAdd(string color, string colorEnd)
+    private string RenderMainSubStateAdd()
     {
-        Console.WriteLine(color + " <D>               ENTER DECIMAL VALUE        (N,V,Z,C)");
-        Console.WriteLine(" <B>               ENTER BINARY VALUE         (N,V,Z,C)");
-        Console.WriteLine(" <H>               ENTER HEXADECIMAL VALUE    (N,V,Z,C)");
-        Console.WriteLine(" <0>               ADC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <1>               ADC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <2>               ADC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <3>               ADC $03 (" + ByteToString(memory[3]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <4>               ADC $04 (" + ByteToString(memory[4]) + ")         (N,V,Z,C)" + colorEnd);
+        Console.Write(" <D>               ENTER DECIMAL VALUE        (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <B>               ENTER BINARY VALUE         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <H>               ENTER HEXADECIMAL VALUE    (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <0>               ADC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <1>               ADC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <2>               ADC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <3>               ADC $03 (" + ByteToString(memory[3]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <4>               ADC $04 (" + ByteToString(memory[4]) + ")         (N,V,Z,C)" + Environment.NewLine);
         return "ADC: ADD WITH CARRY";
     }
     
     // Render status and keybinds for SUBTRACT substate
-    private string RenderMainSubStateSubtract(string color, string colorEnd)
+    private string RenderMainSubStateSubtract()
     {
-        Console.WriteLine(color + " <D>               ENTER DECIMAL VALUE        (N,V,Z,C)");
-        Console.WriteLine(" <B>               ENTER BINARY VALUE         (N,V,Z,C)");
-        Console.WriteLine(" <H>               ENTER HEXADECIMAL VALUE    (N,V,Z,C)");
-        Console.WriteLine(" <0>               SBC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <1>               SBC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <2>               SBC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <3>               SBC $03 (" + ByteToString(memory[3]) + ")         (N,V,Z,C)");
-        Console.WriteLine(" <4>               SBC $04 (" + ByteToString(memory[4]) + ")         (N,V,Z,C)" + colorEnd);
+        Console.Write(" <D>               ENTER DECIMAL VALUE        (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <B>               ENTER BINARY VALUE         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <H>               ENTER HEXADECIMAL VALUE    (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <0>               SBC $00 (" + ByteToString(memory[0]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <1>               SBC $01 (" + ByteToString(memory[1]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <2>               SBC $02 (" + ByteToString(memory[2]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <3>               SBC $03 (" + ByteToString(memory[3]) + ")         (N,V,Z,C)" + Environment.NewLine);
+        Console.Write(" <4>               SBC $04 (" + ByteToString(memory[4]) + ")         (N,V,Z,C)" + Environment.NewLine);
         return "SBC: SUBTRACT WITH CARRY";
     }
 
     // Render status and keybinds for STORE substate
     private string RenderMainSubStateStore()
     {
-        Console.WriteLine(" <0>               ST" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")");
-        Console.WriteLine(" <1>               ST" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")");
-        Console.WriteLine(" <2>               ST" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")");
-        Console.WriteLine(" <3>               ST" + GetRegisterChar(registerIndex) + " $03 (" + ByteToString(memory[3]) + ")");
-        Console.WriteLine(" <4>               ST" + GetRegisterChar(registerIndex) + " $04 (" + ByteToString(memory[4]) + ")");
-        return (registerIndex == 0 ? "STA: STORE ACCUMULATOR" : "ST" + GetRegisterChar(registerIndex) + ": LOAD " + GetRegisterChar(registerIndex) + " REGISTER" );
+        Console.Write(" <0>               ST" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")" + Environment.NewLine);
+        Console.Write(" <1>               ST" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")" + Environment.NewLine);
+        Console.Write(" <2>               ST" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")" + Environment.NewLine);
+        Console.Write(" <3>               ST" + GetRegisterChar(registerIndex) + " $03 (" + ByteToString(memory[3]) + ")" + Environment.NewLine);
+        Console.Write(" <4>               ST" + GetRegisterChar(registerIndex) + " $04 (" + ByteToString(memory[4]) + ")" + Environment.NewLine);
+        return (registerIndex == 0 ? "STA: STORE ACCUMULATOR" : "ST" + GetRegisterChar(registerIndex) + ": LOAD " + GetRegisterChar(registerIndex) + " REGISTER");
     }
 
     // Render status and keybinds for LOAD substate
-    private string RenderMainSubStateLoad(string color, string colorEnd)
+    private string RenderMainSubStateLoad()
     {
-        Console.WriteLine(color + " <D>               ENTER DECIMAL VALUE        (N,Z)");
-        Console.WriteLine(" <B>               ENTER BINARY VALUE         (N,Z)");
-        Console.WriteLine(" <H>               ENTER HEXADECIMAL VALUE    (N,Z)");
-        Console.WriteLine(" <0>               LD" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <1>               LD" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")         (N,Z)");
-        Console.WriteLine(" <2>               LD" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")         (N,Z)");
-        Console.WriteLine(" <3>               LD" + GetRegisterChar(registerIndex) + " $03 (" + ByteToString(memory[3]) + ")         (N,Z)");
-        Console.WriteLine(" <4>               LD" + GetRegisterChar(registerIndex) + " $04 (" + ByteToString(memory[4]) + ")         (N,Z)" + colorEnd);
-        return (registerIndex == 0 ? "LDA: LOAD ACCUMULATOR" : "LD" + GetRegisterChar(registerIndex) + ": LOAD " + GetRegisterChar(registerIndex) + " REGISTER" );
+        Console.Write(" <D>               ENTER DECIMAL VALUE        (N,Z)" + Environment.NewLine);
+        Console.Write(" <B>               ENTER BINARY VALUE         (N,Z)" + Environment.NewLine);
+        Console.Write(" <H>               ENTER HEXADECIMAL VALUE    (N,Z)" + Environment.NewLine);
+        Console.Write(" <0>               LD" + GetRegisterChar(registerIndex) + " $00 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <1>               LD" + GetRegisterChar(registerIndex) + " $01 (" + ByteToString(memory[1]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <2>               LD" + GetRegisterChar(registerIndex) + " $02 (" + ByteToString(memory[2]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <4>               LD" + GetRegisterChar(registerIndex) + " $04 (" + ByteToString(memory[4]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <3>               LD" + GetRegisterChar(registerIndex) + " $03 (" + ByteToString(memory[3]) + ")         (N,Z)" + Environment.NewLine);
+        return (registerIndex == 0 ? "LDA: LOAD ACCUMULATOR" : "LD" + GetRegisterChar(registerIndex) + ": LOAD " + GetRegisterChar(registerIndex) + " REGISTER");
     }
 
     // Render status and keybinds for LOGICAL substate
     private string RenderMainSubStateLogical()
     {
-        Console.WriteLine(" <A>               AND: LOGICAL AND                (N,Z)");
-        Console.WriteLine(" <E>               EOR: EXCLUSIVE OR               (N,Z)");
-        Console.WriteLine(" <O>               ORA: LOGICAL INCLUSIVE OR       (N,Z)");
+        Console.Write(" <A>               AND: LOGICAL AND                (N,Z)" + Environment.NewLine);
+        Console.Write(" <E>               EOR: EXCLUSIVE OR               (N,Z)" + Environment.NewLine);
+        Console.Write(" <O>               ORA: LOGICAL INCLUSIVE OR       (N,Z)" + Environment.NewLine);
         return "LOGICAL OPERATIONS";
     }
 
     // Render status and keybinds for AND substate
-    private string RenderMainSubStateAnd(string color, string colorEnd)
+    private string RenderMainSubStateAnd()
     {
-        Console.WriteLine(color + " <D>               ENTER DECIMAL VALUE        (N,Z)");
-        Console.WriteLine(" <B>               ENTER BINARY VALUE         (N,Z)");
-        Console.WriteLine(" <H>               ENTER HEXADECIMAL VALUE    (N,Z)");
-        Console.WriteLine(" <0>               AND $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <1>               AND $01 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <2>               AND $02 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <3>               AND $03 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <4>               AND $04 (" + ByteToString(memory[0]) + ")         (N,Z)" + colorEnd);
+        Console.Write(" <D>               ENTER DECIMAL VALUE        (N,Z)" + Environment.NewLine);
+        Console.Write(" <B>               ENTER BINARY VALUE         (N,Z)" + Environment.NewLine);
+        Console.Write(" <H>               ENTER HEXADECIMAL VALUE    (N,Z)" + Environment.NewLine);
+        Console.Write(" <0>               AND $00 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <1>               AND $01 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <2>               AND $02 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <3>               AND $03 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <4>               AND $04 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
         return "AND: LOGICAL AND";
     }
 
     // Render status and keybinds for EOR substate
-    private string RenderMainSubStateEor(string color, string colorEnd)
+    private string RenderMainSubStateEor()
     {
-        Console.WriteLine(color + " <D>               ENTER DECIMAL VALUE");
-        Console.WriteLine(" <B>               ENTER BINARY VALUE");
-        Console.WriteLine(" <H>               ENTER HEXADECIMAL VALUE");
-        Console.WriteLine(" <0>               EOR $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <1>               EOR $01 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <2>               EOR $02 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <3>               EOR $03 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <4>               EOR $04 (" + ByteToString(memory[0]) + ")         (N,Z)" + colorEnd);
+        Console.Write(" <D>               ENTER DECIMAL VALUE" + Environment.NewLine);
+        Console.Write(" <B>               ENTER BINARY VALUE" + Environment.NewLine);
+        Console.Write(" <H>               ENTER HEXADECIMAL VALUE" + Environment.NewLine);
+        Console.Write(" <0>               EOR $00 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <1>               EOR $01 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <2>               EOR $02 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <3>               EOR $03 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <4>               EOR $04 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
         return "EOR: EXCLUSIVE OR";
     }
 
     // Render status and keybinds for ORA substate
-    private string RenderMainSubStateOra(string color, string colorEnd)
+    private string RenderMainSubStateOra()
     {
-        Console.WriteLine(color + " <D>               ENTER DECIMAL VALUE");
-        Console.WriteLine(" <B>               ENTER BINARY VALUE");
-        Console.WriteLine(" <H>               ENTER HEXADECIMAL VALUE");
-        Console.WriteLine(" <0>               ORA $00 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <1>               ORA $01 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <2>               ORA $02 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <3>               ORA $03 (" + ByteToString(memory[0]) + ")         (N,Z)");
-        Console.WriteLine(" <4>               ORA $04 (" + ByteToString(memory[0]) + ")         (N,Z)" + colorEnd);
+        Console.Write(" <D>               ENTER DECIMAL VALUE" + Environment.NewLine);
+        Console.Write(" <B>               ENTER BINARY VALUE" + Environment.NewLine);
+        Console.Write(" <H>               ENTER HEXADECIMAL VALUE" + Environment.NewLine);
+        Console.Write(" <0>               ORA $00 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <1>               ORA $01 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <2>               ORA $02 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <3>               ORA $03 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
+        Console.Write(" <4>               ORA $04 (" + ByteToString(memory[0]) + ")         (N,Z)" + Environment.NewLine);
         return "ORA: LOGICAL INCLUSIVE OR";
     }
 
@@ -944,18 +1009,16 @@
     {
         if (registerIndex == 0) 
         {
-            Console.WriteLine(" <X>               TAX                    (N,Z)");
-            Console.WriteLine(" <Y>               TAY                    (N,Z)");
+            Console.Write(" <X>               TAX                    (N,Z)" + Environment.NewLine);
+            Console.Write(" <Y>               TAY                    (N,Z)" + Environment.NewLine);
         }
         else if (registerIndex == 1) 
         {
-            Console.WriteLine(" <A>               TXA                    (N,Z)");
-            Console.WriteLine();
+            Console.Write(" <A>               TXA                    (N,Z)" + Environment.NewLine);
         }
         else if (registerIndex == 2) 
         {
-            Console.WriteLine(" <A>               TYA                    (N,Z)");
-            Console.WriteLine();
+            Console.Write(" <A>               TYA                    (N,Z)" + Environment.NewLine);
         }
         return "TRANSFER " + (registerIndex == 0 ? "ACCUMULATOR" : GetRegisterChar(registerIndex) + " REGISTER" );
     }
@@ -964,26 +1027,27 @@
     private void RenderMainSubState()
     {
         string footerTitle = "";
-        string color = (inputMode != INPUT_MODE.NORMAL ? COLOR_FG_BRIGHT_BLACK : "" );
-        string colorEnd = (inputMode != INPUT_MODE.NORMAL ? COLOR_DEFAULT : "" );
+
+        // Grey out text if in COMMAND or NUMERICAL input mode
+        if (inputMode != INPUT_MODE.NORMAL) { Console.ForegroundColor = COLOR_INACTIVE_FG; }
 
         // Check substate and call appropriate render method
         switch (mainSubState)
         {
             case MAIN_SUB_STATE.DEFAULT or MAIN_SUB_STATE.QUIT:
-                RenderMainSubStateDefault(color, colorEnd);
+                RenderMainSubStateDefault();
                 break;
             case MAIN_SUB_STATE.ADD:
-                footerTitle = RenderMainSubStateAdd(color, colorEnd);
+                footerTitle = RenderMainSubStateAdd();
                 break;
             case MAIN_SUB_STATE.SUBTRACT:
-                footerTitle = RenderMainSubStateSubtract(color, colorEnd);
+                footerTitle = RenderMainSubStateSubtract();
                 break;
             case MAIN_SUB_STATE.STORE:
                 footerTitle = RenderMainSubStateStore();
                 break;
             case MAIN_SUB_STATE.LOAD:
-                footerTitle = RenderMainSubStateLoad(color, colorEnd);
+                footerTitle = RenderMainSubStateLoad();
                 break;
             case MAIN_SUB_STATE.TRANSFER:
                 footerTitle = RenderMainSubStateTransfer();
@@ -992,27 +1056,48 @@
                 footerTitle = RenderMainSubStateLogical();
                 break;
             case MAIN_SUB_STATE.AND:
-                footerTitle = RenderMainSubStateAnd(color, colorEnd);
+                footerTitle = RenderMainSubStateAnd();
                 break;
             case MAIN_SUB_STATE.EOR:
-                footerTitle = RenderMainSubStateEor(color, colorEnd);
+                footerTitle = RenderMainSubStateEor();
                 break;
             case MAIN_SUB_STATE.ORA:
-                footerTitle = RenderMainSubStateOra(color, colorEnd);
+                footerTitle = RenderMainSubStateOra();
                 break;
         }
+
+        // Set text color back to normal
+        if (inputMode != INPUT_MODE.NORMAL) { Console.ResetColor(); }
 
         // Add empty lines to fill RENDER_HEIGHT
         for (int i = Console.CursorTop; i < RENDER_HEIGHT - 3; i++)
         {
-            Console.WriteLine();
+            Console.Write(Environment.NewLine);
         }
         
         // Footer
-        Console.WriteLine(seperator[0]);
-        if (mainSubState == MAIN_SUB_STATE.DEFAULT) { Console.WriteLine(" PRESS <ESC> TO QUIT"); }
-        else if (mainSubState == MAIN_SUB_STATE.QUIT) { Console.WriteLine(" " + COLOR_BG_DARK_RED + COLOR_FG_BLACK + " ARE YOU SURE YOU WANT TO QUIT? Y/N " + COLOR_DEFAULT); }
-        else { Console.WriteLine(" " + (COLOR_BG_DARK_GREEN + COLOR_FG_BLACK + " " + footerTitle +" " + COLOR_DEFAULT).PadRight(46,' ') + " PRESS <ESC> TO CANCEL"); }
+        Console.Write(seperator[0] + Environment.NewLine);
+        if (mainSubState == MAIN_SUB_STATE.DEFAULT) 
+        { 
+            Console.Write(" PRESS <ESC> TO QUIT" + Environment.NewLine); 
+        }
+        else if (mainSubState == MAIN_SUB_STATE.QUIT) 
+        {
+            Console.Write(" ");
+            Console.ForegroundColor = COLOR_QUIT_PROMPT_FG;
+            Console.BackgroundColor = COLOR_QUIT_PROMPT_BG;
+            Console.Write(" ARE YOU SURE YOU WANT TO QUIT? Y/N " + Environment.NewLine);
+            Console.ResetColor();
+        }
+        else 
+        {
+            Console.Write(" ");
+            Console.ForegroundColor = COLOR_SUB_STATE_FG;
+            Console.BackgroundColor = COLOR_SUB_STATE_BG;
+            Console.Write(" " + footerTitle + " ");
+            Console.ResetColor();
+            Console.Write(" PRESS <ESC> TO CANCEL".PadLeft(RENDER_WIDTH - 4 - footerTitle.Length, ' ') + Environment.NewLine); 
+        }
 
         if (inputMode != INPUT_MODE.NORMAL)
         {
@@ -1025,49 +1110,66 @@
     private void RenderMain()
     {
         // Main title
-        RenderTitlebar();
+        RenderMainTitlebar();
 
-        // Format the display string
-        string displayLine = ByteToString(registers[registerIndex]);
-        
-        // Vertical spacer
-        Console.WriteLine();
-       
         // Register selector
-        string storageLine = " ";
-        string storageLineHex = " ";
+        Console.Write(" ");
         for (byte i = 0; i < REGISTER_NUM; i++)
         {
-            if (i == registerIndex) { storageLine += COLOR_FG_BLACK + COLOR_BG_BRIGHT_YELLOW; }
-            else { storageLine += COLOR_FG_BLACK + COLOR_BG_BRIGHT_BLACK; }
-            storageLine += "  " + GetRegisterChar(i) + "  " + COLOR_DEFAULT + "  ";
-            if (i != registerIndex) { storageLineHex += COLOR_FG_DARK_WHITE; }
-            storageLineHex += " 0x" + HexToString(registers[i]) + "  ";
-            if (i != registerIndex) { storageLineHex += COLOR_DEFAULT; }
+            if (i == registerIndex) {
+                Console.ForegroundColor = COLOR_REGISTER_ACTIVE_FG;
+                Console.BackgroundColor = COLOR_REGISTER_ACTIVE_BG;
+            }
+            else {
+                Console.ForegroundColor = COLOR_REGISTER_INACTIVE_FG;
+                Console.BackgroundColor = COLOR_REGISTER_INACTIVE_BG;
+            }
+            Console.Write("  " + GetRegisterChar(i) + "  ");
+            Console.ResetColor();
+            Console.Write("  ");
         }
-        
+
         // Memory status
         for (byte i = 0; i < MEMORY_NUM; i++)
         {
-            storageLine += " $" + (i.ToString()).PadLeft(2,'0') + ":  ";
-            storageLineHex += " 0x" + HexToString(memory[i]) + "  ";
+            Console.Write(" $" + (i.ToString()).PadLeft(2, '0') + ":  ");
         }
-        Console.WriteLine(storageLine);
-        Console.WriteLine(storageLineHex);
 
-        // Vertical spacer
-        Console.WriteLine();
+        // End storage line
+        Console.Write(Environment.NewLine);
+
+        // Register selector (hex value)
+        Console.Write(" ");
+        for (byte i = 0; i < REGISTER_NUM; i++)
+        {
+            if (i != registerIndex) { Console.ForegroundColor = COLOR_REGISTER_INACTIVE_BG; }
+            Console.Write(" 0x" + HexToString(registers[i]) + "  ");
+            if (i != registerIndex) { Console.ResetColor(); }
+        }
+
+        // Memory status (hex value)
+        for (byte i = 0; i < MEMORY_NUM; i++)
+        {
+            Console.Write(" 0x" + HexToString(memory[i]) + "  ");
+        }
         
-        // Binary value titlebar
-        Console.WriteLine(COLOR_BG_DARK_WHITE + COLOR_FG_BLACK + (" BINARY VALUE:").PadRight(RENDER_WIDTH,' ') + COLOR_DEFAULT);
+        // End storage line (hex value)
+        Console.Write(Environment.NewLine);
 
         // Vertical spacer
-        Console.WriteLine();
+        Console.Write(Environment.NewLine);
+
+        // Binary value titlebar
+        RenderTitlebar("BINARY VALUE:");
+
+        // Vertical spacer
+        Console.Write(Environment.NewLine);
 
         // Iterate through the x and y coords of the "pixels" and display the digits from the selected register
+        string displayLine = ByteToString(registers[registerIndex]);
         for (int y = 0; y < CHAR_HEIGHT; y++)
         {
-            display[y] = " ";
+            Console.Write(" ");
             for (int x = 0; x < CHAR_WIDTH * displayLine.Length; x++)
             {
                 // Find the current char from the input string
@@ -1075,53 +1177,87 @@
 
                 // Convert the char to a index number for the DIGITS array
                 int currentDigit = 0;
-                if (Char.IsNumber(currentChar))
-                {
-                    currentDigit = (int)Char.GetNumericValue(currentChar); 
-                }
+                if (Char.IsNumber(currentChar)) { currentDigit = (int)Char.GetNumericValue(currentChar); }
 
                 // Check if the current bit was changed by last operation
                 byte bitToCheck = (byte)(0b10000000 >> (byte)(x / CHAR_WIDTH));
                 bool bitChanged = (registers[registerIndex] & bitToCheck) != (registersPrev[registerIndex] & bitToCheck);
-                
-                // Set the value of the current "pixel"
-                display[y] += digits[currentDigit,y,x % CHAR_WIDTH] ? (bitChanged && settings["uiHlChangedBit"].enabled) ? COLOR_FG_BRIGHT_YELLOW + FILLED + COLOR_DEFAULT : FILLED : EMPTY;
+
+                // Render the current "pixel"
+                if (bitChanged && settings["uiHlChangedBit"].enabled) { Console.ForegroundColor = COLOR_BIT_HL_FG; }
+                Console.Write(digits[currentDigit, y, x % CHAR_WIDTH] ? FILLED : EMPTY);
+                if (bitChanged && settings["uiHlChangedBit"].enabled) { Console.ResetColor(); }
             }
 
-            // Render the results of the current row
-            Console.WriteLine(display[y]);
+            // End the current line
+            Console.Write(Environment.NewLine);
         }
 
         // Vertical spacer
-        Console.WriteLine();
+        Console.Write(Environment.NewLine);
 
         // Decimal values titlebar
-        Console.WriteLine(COLOR_BG_DARK_WHITE + COLOR_FG_BLACK + (" DECIMAL VALUE:").PadRight(RENDER_WIDTH,' ') + COLOR_DEFAULT);
+        RenderTitlebar("DECIMAL VALUE:");
         
         // Decimal values
-        Console.WriteLine(" UNSIGNED VALUE:     " + (registers[registerIndex].ToString()).PadLeft(3,' ') + "        SIGNED VALUE:      " + (((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString()).PadLeft(4,' '));
+        Console.Write(" UNSIGNED VALUE:     " + (registers[registerIndex].ToString()).PadLeft(3,' ') + 
+            "        SIGNED VALUE:      " + (((int)((registers[registerIndex] & 0b01111111) - (registers[registerIndex] & 0b10000000))).ToString()).PadLeft(4,' ') 
+            + Environment.NewLine);
 
         // Flags titlebar
-        Console.WriteLine(COLOR_BG_DARK_WHITE + COLOR_FG_BLACK + (" FLAGS:").PadRight(RENDER_WIDTH,' ') + COLOR_DEFAULT);
-        
-        // Flags
-        string carryFlagString = " (C) CARRY FLAG:       " + (carryFlag ? COLOR_FG_DARK_GREEN + "1" : COLOR_FG_DARK_RED + "0") + COLOR_DEFAULT;
-        string zeroFlagString = "        (Z) ZERO FLAG:        " + (zeroFlag ? COLOR_FG_DARK_GREEN + "1"  : COLOR_FG_DARK_RED + "0") + COLOR_DEFAULT;
-        string negativeFlagString = " (N) NEGATIVE FLAG:    " + (negativeFlag ? COLOR_FG_DARK_GREEN + "1" : COLOR_FG_DARK_RED + "0") + COLOR_DEFAULT;
-        string overFlowFlagString = "        (V) OVERFLOW FLAG:    " + (overflowFlag ? COLOR_FG_DARK_GREEN + "1" : COLOR_FG_DARK_RED + "0") + COLOR_DEFAULT;
-        Console.WriteLine(carryFlagString + zeroFlagString);
-        Console.WriteLine(negativeFlagString + overFlowFlagString);
-        
+        RenderTitlebar("FLAGS:");
+
+        // Carry flag
+        Console.Write(" (C) CARRY FLAG:       ");
+        if (carryFlag) { Console.ForegroundColor = COLOR_FLAG_SET_FG; Console.Write("1"); }
+        else { Console.ForegroundColor = COLOR_FLAG_UNSET_FG; Console.Write("0"); }
+        Console.ResetColor();
+
+        // Whitespace between flags
+        Console.Write("       ");
+
+        // Zero flag
+        Console.Write(" (Z) ZERO FLAG:        ");
+        if (zeroFlag) { Console.ForegroundColor = COLOR_FLAG_SET_FG; Console.Write("1"); }
+        else { Console.ForegroundColor = COLOR_FLAG_UNSET_FG; Console.Write("0"); }
+        Console.ResetColor();
+
+        // End the current line
+        Console.Write(Environment.NewLine);
+
+        // Negative flag
+        Console.Write(" (N) NEGATIVE FLAG:    ");
+        if (negativeFlag) { Console.ForegroundColor = COLOR_FLAG_SET_FG; Console.Write("1"); }
+        else { Console.ForegroundColor = COLOR_FLAG_UNSET_FG; Console.Write("0"); }
+        Console.ResetColor();
+
+        // Whitespace between flags
+        Console.Write("       ");
+
+        // Overflow flag
+        Console.Write(" (V) OVERFLOW FLAG:    ");
+        if (overflowFlag) { Console.ForegroundColor = COLOR_FLAG_SET_FG; Console.Write("1"); }
+        else { Console.ForegroundColor = COLOR_FLAG_UNSET_FG; Console.Write("0"); }
+        Console.ResetColor();
+
+        // End the current line
+        Console.Write(Environment.NewLine);
+
         // Message log titlebar
         int messageIndexMax = Math.Max(messages.Count - MESSAGES_NUM, 0);
         int messageIndexNumDigits = Math.Max(messageIndexMax.ToString().Length, 2);
-        Console.WriteLine(COLOR_BG_DARK_WHITE + COLOR_FG_BLACK + " MESSAGE LOG:" + ("<SHIFT> + <UP> / <DOWN> (" + messageIndex.ToString().PadLeft(messageIndexNumDigits,'0') + "/" + messageIndexMax.ToString().PadLeft(messageIndexNumDigits,'0') + ") ").PadLeft(43,' ') + COLOR_DEFAULT);
+        RenderTitlebar("MESSAGE LOG:" + 
+            ((settings["modKeyCtrl"].enabled ? "<CTRL> + <UP> / <DOWN> (" : "<SHIFT> + <UP> / <DOWN> (") + 
+            messageIndex.ToString().PadLeft(messageIndexNumDigits, '0') + 
+            "/" + 
+            messageIndexMax.ToString().PadLeft(messageIndexNumDigits, '0') + 
+            ")").PadLeft(RENDER_WIDTH - 14, ' '));
        
         // Render message log
         RenderMessages();
         
         // Keybinds titlebar
-        Console.WriteLine(COLOR_BG_DARK_WHITE + COLOR_FG_BLACK + (" KEY:              ACTION:                    FLAGS:").PadRight(RENDER_WIDTH,' ') + COLOR_DEFAULT);
+        RenderTitlebar("KEY:              ACTION:                    FLAGS:");
         
         // Render status, available keybinds and footer for the current substate
         RenderMainSubState();
@@ -1131,8 +1267,7 @@
     private void RenderHelp(){
         
         // Main title
-        RenderTitlebar();
-        Console.WriteLine();
+        RenderMainTitlebar();
 
         // Render the HELP container
         containerScroll[STATE.HELP].Render();
@@ -1142,8 +1277,7 @@
     private void RenderSettings(){
         
         // Main title
-        RenderTitlebar();
-        Console.WriteLine();
+        RenderMainTitlebar();
         
         // Render the SETTINGS container
         containerToggle[STATE.SETTINGS].Render();
@@ -1153,8 +1287,7 @@
     private void RenderAssembly(){
         
         // Main title
-        RenderTitlebar();
-        Console.WriteLine();
+        RenderMainTitlebar();
 
         // Render the ASSEMBLY container
         containerScroll[STATE.ASSEMBLY].Render();
@@ -1167,15 +1300,15 @@
         Console.Clear();
 
         // Show error message
-        Console.WriteLine("ERROR!");
+        Console.Write("ERROR!" + Environment.NewLine);
 
         // Show error message if window size is too small
         if (appError["windowSize"])
         {
-            Console.WriteLine("WINDOW SIZE IS TOO SMALL!");
-            Console.WriteLine("PLEASE RESIZE THE WINDOW");
-            Console.WriteLine("AND PRESS <ENTER>");
-            Console.WriteLine("OR PRESS <ESC> TO QUIT");
+            Console.Write("WINDOW SIZE IS TOO SMALL!" + Environment.NewLine);
+            Console.Write("PLEASE RESIZE THE WINDOW" + Environment.NewLine);
+            Console.Write("AND PRESS <ENTER>" + Environment.NewLine);
+            Console.Write("OR PRESS <ESC> TO QUIT" + Environment.NewLine);
         }
     }
 
@@ -1185,7 +1318,7 @@
         // Clear the console
         Console.SetCursorPosition(0,0);
         for (int i = 0; i < RENDER_HEIGHT; i++){
-            Console.WriteLine(blank);
+            Console.Write(blank + Environment.NewLine);
         }
         Console.SetCursorPosition(0,0);
       
@@ -1964,7 +2097,7 @@
     private void RenderInputLine()
     {
         string inputLineFormatted = " :" + FormatInputLine();
-        Console.WriteLine(inputLineFormatted);
+        Console.Write(inputLineFormatted);
         Console.SetCursorPosition(inputLineFormatted.Length,RENDER_HEIGHT-1);
     }
 
@@ -2045,7 +2178,7 @@
             ConsoleKeyInfo key = Console.ReadKey(true);
 
             // Check if key modifier was pressed
-            bool keyMod = key.Modifiers.HasFlag(ConsoleModifiers.Shift);
+            bool keyMod = (settings["modKeyCtrl"].enabled ? key.Modifiers.HasFlag(ConsoleModifiers.Control) : key.Modifiers.HasFlag(ConsoleModifiers.Shift));
 
             // Call the correct GetInput for the current INPUT_MODE
             switch (inputMode)
@@ -2171,9 +2304,12 @@
     public void Run()
     {
         // Clear console and hide cursor
-        Console.CursorVisible = false;
-        Console.Clear();
-        
+        ConsoleReset();
+        Console.SetBufferSize(RENDER_WIDTH+1, RENDER_HEIGHT+1);
+
+        // Set window size to fit the app (if running in windows)
+        if (WIN_BUILD) { Console.SetWindowSize(RENDER_WIDTH+1, RENDER_HEIGHT+1); }
+
         while (running == true)
         {
             CheckWindowSize();
@@ -2182,9 +2318,7 @@
         }
 
         // Exit the program and reset the console
-        Console.WriteLine(COLOR_DEFAULT);
-        Console.CursorVisible = true;
-        Console.Clear();
+        ConsoleReset();
         asmFile.Close();
     }
    

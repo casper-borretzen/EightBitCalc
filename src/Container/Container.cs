@@ -15,9 +15,19 @@ public abstract class Container {
 
     // Move scroll/selection down
     public abstract bool Down();
-    
+
     // Render the container header
-    protected abstract void RenderHeader();
+    protected void RenderHeader()
+    {
+        Console.Write(" ");
+        Console.ForegroundColor = BinaryCalc.COLOR_CONTAINER_HEADER_FG;
+        Console.BackgroundColor = BinaryCalc.COLOR_CONTAINER_HEADER_BG;
+        Console.Write(" " + title + " ");
+        Console.ResetColor();
+        Console.Write("<UP> SCROLL UP / <DOWN> SCROLL DOWN".PadLeft(BinaryCalc.RENDER_WIDTH - title.Length - 4, ' '));
+        Console.Write(Environment.NewLine);
+        Console.Write(BinaryCalc.seperator[0] + Environment.NewLine);
+    }
 
     // Render lines of content
     protected abstract void RenderContent();
@@ -74,8 +84,8 @@ public abstract class Container {
     {
         for (int i = 0; i < size; i++)
         {
-            if (i == 0) { Console.WriteLine(" -"); }
-            else {Console.WriteLine(); }
+            if (i == 0) { Console.Write(" -" + Environment.NewLine); }
+            else {Console.Write(Environment.NewLine); }
         }
     }
 
@@ -92,8 +102,8 @@ public abstract class Container {
     // Render the container footer
     private void RenderFooter()
     {
-        Console.WriteLine(BinaryCalc.seperator[0]);
-        Console.WriteLine(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + GetScrollPos().PadLeft(17));
+        Console.Write(BinaryCalc.seperator[0] + Environment.NewLine);
+        Console.Write(" PRESS <ESC> TO RETURN TO MAIN SCREEN " + GetScrollPos().PadLeft(17) + Environment.NewLine);
     }
 
     // Constructor
