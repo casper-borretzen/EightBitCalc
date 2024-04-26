@@ -1,3 +1,5 @@
+namespace EightBitCalc;
+
 // A scrollable container to hold lines to be rendered on screen
 public abstract class Container {
     protected string title = "";

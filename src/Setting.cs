@@ -1,3 +1,5 @@
+namespace EightBitCalc;
+
 public class Setting
 {
     public bool enabled { get; private set; }

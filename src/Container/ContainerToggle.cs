@@ -1,3 +1,5 @@
+namespace EightBitCalc;
+
 // Scrollable container with entries that can be toggled on/off
 public class ContainerToggle : Container
 {

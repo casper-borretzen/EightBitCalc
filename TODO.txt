@@ -22,8 +22,6 @@
    + CPY: Compare Y register
    + INC: Increment a memory location
    + DEC: Decrement a memory location
- 
- - The code is quite messy: Restructure project, split up into multiple classes/files
 
  - Option to toggle assembly logging to file on/off (log.asm)
 
@@ -40,4 +38,3 @@
  - Load .asm from file and run instructions
 
  - Save preferences and memory to file
-

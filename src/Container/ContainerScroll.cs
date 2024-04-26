@@ -1,3 +1,5 @@
+namespace EightBitCalc;
+
 // A scrollable container of text
 public class ContainerScroll : Container
 {
