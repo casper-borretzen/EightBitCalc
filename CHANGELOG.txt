@@ -1,3 +1,6 @@
+v8.1.0
+ - Restructured project, split up into multiple main classes
+
 v8.0.0
  - Added more substates: LOGICAL, AND, ORA, EOR with hotkeys and menus
  - Main UI overhaul
@@ -14,7 +17,6 @@ v8.0.0
  - Added more text to the HELP screen
  - Fixed a number of typos and various small errors
  - Made several changes to make the application run better in windows (Added WIN_BUILD const that enables window specific code)
- - Restructured project, split up into multiple main classes
 
 v7.0.0
  - Added more substates: TRANSFER, STORE and LOAD
