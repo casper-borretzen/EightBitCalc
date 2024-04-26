@@ -2,9 +2,9 @@
 
 An 8-bit binary calculator made with the C# programming language.
 
-Available operations and flags mimick the 6502 processor.
+Available operations and flags mimic the 6502 processor.
 
-Made with the intention of being a learning tool for understanding binary operations and 6502 assembly code.
+Made with the intention of being a learning tool for understanding bitwise operations and 6502 assembly language.
 
 ![screenshot](screenshots/screenshot_00.png?raw=true "screenshot")
 
