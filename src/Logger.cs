@@ -41,16 +41,15 @@ class Logger
         return false;
     }
 
+    public void SaveToFile() 
+    {
+        asmFile.Close();
+    }
+
     // Constructor
     public Logger(BinaryCalc binaryCalc) 
     {
         this.binaryCalc = binaryCalc;
         asmFile = new StreamWriter("log.asm");
-    }
-
-    // Destructor
-    ~Logger() 
-    {
-        asmFile.Close();
     }
 }

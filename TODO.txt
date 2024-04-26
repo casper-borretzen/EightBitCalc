@@ -2,6 +2,10 @@
 // TODO:
 ///////////////////////////////////////////////////////////////////////////////
 
+ - Buffer size (in windows should be excactly same as render size)
+
+ - Test more and look for bugs!
+
  - Add history to NUMERICAL input mode (press up/down to scroll history)
  
  - Add ":" command mode

@@ -463,7 +463,9 @@ class BinaryCalc
 
         // Exit the program and reset the console
         ConsoleReset();
-        
+
+        // Save the assembly log to .asm file
+        logger.SaveToFile();
     }
    
     // Class constructor
