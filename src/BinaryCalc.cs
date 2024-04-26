@@ -5,7 +5,7 @@ class BinaryCalc
     // Build consts
     public const bool WIN_BUILD = false;  // Set to true if building for Windows
     private const byte VERSION_MAJOR = 8;
-    private const byte VERSION_MINOR = 0;
+    private const byte VERSION_MINOR = 1;
     private const byte VERSION_PATCH = 0;
 
     // Set main classes
