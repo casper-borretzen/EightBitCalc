@@ -452,7 +452,7 @@ class BinaryCalc
         ConsoleReset();
         
         // Set window size to fit the app (if running in windows)
-        if (WIN_BUILD) { Console.SetBufferSize(RENDER_WIDTH + 1, RENDER_HEIGHT + 1); Console.SetWindowSize(RENDER_WIDTH+1, RENDER_HEIGHT+1); }
+        if (WIN_BUILD) { Console.SetWindowSize(RENDER_WIDTH, RENDER_HEIGHT); Console.SetBufferSize(RENDER_WIDTH + 2, RENDER_HEIGHT); }
 
         while (running == true)
         {
