@@ -368,7 +368,7 @@ internal class Render
         Console.Write(" ");
         for (byte i = 0; i < BinaryCalc.REGISTER_NUM; i++)
         {
-            if (i != processor.registerIndex) { Console.ForegroundColor = BinaryCalc.COLOR_REGISTER_INACTIVE_BG; }
+            if (i != processor.registerIndex) { Console.ForegroundColor = BinaryCalc.COLOR_REGISTER_INACTIVE_HEX_FG; }
             Console.Write(" 0x" + BinaryCalc.HexToString(processor.registers[i]) + "  ");
             if (i != processor.registerIndex) { Console.ResetColor(); }
         }
